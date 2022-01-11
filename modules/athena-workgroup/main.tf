@@ -34,10 +34,12 @@ resource "aws_athena_workgroup" "this" {
     enforce_workgroup_configuration    = !var.client_config_enabled
     publish_cloudwatch_metrics_enabled = var.cloudwatch_metrics_enabled
     requester_pays_enabled             = var.query_on_s3_requester_pays_bucket_enabled
+    bytes_scanned_cutoff_per_query     = var.per_query_data_usage_limit
 
     engine_version {
       selected_engine_version = "AUTO"
     }
+
     dynamic "result_configuration" {
       for_each = local.query_result_s3_path != null ? ["go"] : []
 
