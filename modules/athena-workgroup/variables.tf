@@ -49,6 +49,8 @@ variable "query_result" {
   (Optional) The configuration for query result location and encryption. A `query_result` block as defined below.
     (Required) `s3_bucket` - The name of the S3 bucket used to store the query result.
     (Optional) `s3_key_prefix` - The key prefix for the specified S3 bucket. Defaults to `null`.
+    (Optional) `s3_bucket_expected_owner` - The AWS account ID that you expect to be the owner of the Amazon S3 bucket.
+    (Optional) `s3_bucket_owner_full_control_enabled` - Enabling this option grants the owner of the S3 query results bucket full control over the query results. This means that if your query result location is owned by another account, you grant full control over your query results to the other account.
     (Optional) `encryption_enabled` - Whether to encrypt query results on S3 bucket.
     (Optional) `encryption_mode` - Indicates whether Amazon S3 server-side encryption with Amazon S3-managed keys (SSE_S3), server-side encryption with KMS-managed keys (SSE_KMS), or client-side encryption with KMS-managed keys (CSE_KMS) is used. If a query runs in a workgroup and the workgroup overrides client-side settings, then the workgroup's setting for encryption is used.
     (Optional) `encryption_kms_key` - For `SSE_KMS` and `CSE_KMS` encryption modes, this is the KMS key Amazon Resource Name (ARN).

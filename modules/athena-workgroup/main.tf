@@ -44,7 +44,8 @@ resource "aws_athena_workgroup" "this" {
       for_each = local.query_result_s3_path != null ? ["go"] : []
 
       content {
-        output_location = local.query_result_s3_path
+        output_location       = local.query_result_s3_path
+        expected_bucket_owner = try(var.query_result.s3_bucket_expected_owner, null)
 
         dynamic "encryption_configuration" {
           for_each = try(var.query_result.encryption_enabled, false) ? ["go"] : []
@@ -52,6 +53,14 @@ resource "aws_athena_workgroup" "this" {
           content {
             encryption_option = try(var.query_result.encryption_mode, "SSE_S3")
             kms_key_arn       = try(var.query_result.encryption_kms_key, null)
+          }
+        }
+
+        dynamic "acl_configuration" {
+          for_each = try(var.query_result.s3_bucket_owner_full_control_enabled, false) ? ["go"] : []
+
+          content {
+            s3_acl_option = "BUCKET_OWNER_FULL_CONTROL"
           }
         }
       }
