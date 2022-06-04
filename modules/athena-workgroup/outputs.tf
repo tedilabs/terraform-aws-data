@@ -55,6 +55,9 @@ output "query_result" {
     s3_key_prefix = local.query_result_s3_key_prefix
     s3_path       = local.query_result_s3_path
 
+    s3_bucket_expected_owner             = try(var.query_result.s3_bucket_expected_owner, null)
+    s3_bucket_owner_full_control_enabled = try(var.query_result.s3_bucket_owner_full_control_enabled, false)
+
     encryption_enabled = try(var.query_result.encryption_enabled, false)
     encryption_mode    = try(aws_athena_workgroup.this.configuration[0].result_configuration[0].encryption_configuration[0].encryption_option, null)
     encryption_kms_key = try(aws_athena_workgroup.this.configuration[0].result_configuration[0].encryption_configuration[0].kms_key_arn, null)
