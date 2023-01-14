@@ -1,3 +1,5 @@
 # Modules
 ":floppy_disk: athena-workgroup":
 - modules/athena-workgroup/**/*
+":floppy_disk: s3-bucket":
+- modules/s3-bucket/**/*
