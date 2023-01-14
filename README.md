@@ -4,7 +4,30 @@
 ![GitHub](https://img.shields.io/github/license/tedilabs/terraform-aws-data?color=blue&style=flat-square)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white&style=flat-square)](https://github.com/pre-commit/pre-commit)
 
-Terraform module which creates security related resources on AWS.
+Terraform module which creates data related resources on AWS.
+
+- [athena-workgroup](./modules/athena-workgroup)
+- [s3-bucket](./modules/s3-bucket)
+
+
+## Target AWS Services
+
+Terraform Modules from [this package](https://github.com/tedilabs/terraform-aws-data) were written to manage the following AWS Services with Terraform.
+
+- **AWS Athena**
+  - Workgroup
+- **AWS S3**
+  - S3 Bucket
+
+
+## Examples
+
+### S3 Bucket
+
+- [Full S3 Bucket](./examples/s3-bucket-full)
+- [S3 Bucket with Server-Side Encryption](./examples/s3-bucket-encryption)
+- [S3 Bucket with Lifecycle Rules](./examples/s3-bucket-lifecycle-rules)
+- [S3 Bucket with Versioning](./examples/s3-bucket-versioning)
 
 
 ## Self Promotion
