@@ -4,8 +4,9 @@ This module creates following resources.
 
 - `aws_s3_bucket`
 - `aws_s3_bucket_accelerate_configuration`
-- `aws_s3_bucket_cors_configuration`
-- `aws_s3_bucket_lifecycle_configuration`
+- `aws_s3_bucket_acl` (optional)
+- `aws_s3_bucket_cors_configuration` (optional)
+- `aws_s3_bucket_lifecycle_configuration` (optional)
 - `aws_s3_bucket_logging` (optional)
 - `aws_s3_bucket_object_lock_configuration` (optional)
 - `aws_s3_bucket_ownership_controls`

@@ -16,7 +16,7 @@ locals {
 
 
 ###################################################
-# S3 Bucket for archive
+# S3 Bucket
 ###################################################
 
 # TODO: replication_configuration
