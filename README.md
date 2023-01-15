@@ -7,6 +7,7 @@
 Terraform module which creates data related resources on AWS.
 
 - [athena-workgroup](./modules/athena-workgroup)
+- [s3-access-point](./modules/s3-access-point)
 - [s3-bucket](./modules/s3-bucket)
 
 
@@ -18,6 +19,7 @@ Terraform Modules from [this package](https://github.com/tedilabs/terraform-aws-
   - Workgroup
 - **AWS S3**
   - S3 Bucket
+  - S3 Access Point
 
 
 ## Examples
@@ -28,6 +30,11 @@ Terraform Modules from [this package](https://github.com/tedilabs/terraform-aws-
 - [S3 Bucket with Server-Side Encryption](./examples/s3-bucket-encryption)
 - [S3 Bucket with Lifecycle Rules](./examples/s3-bucket-lifecycle-rules)
 - [S3 Bucket with Versioning](./examples/s3-bucket-versioning)
+
+### S3 Access Point
+
+- [S3 Access Point (Internet Access)](./examples/s3-access-point-internet)
+- [S3 Access Point (VPC Access)](./examples/s3-access-point-vpc)
 
 
 ## Self Promotion
