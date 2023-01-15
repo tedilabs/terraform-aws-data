@@ -280,6 +280,25 @@ variable "logging_s3_key_prefix" {
   default     = null
 }
 
+variable "request_metrics" {
+  description = <<EOF
+  (Optional) A list of CORS (Cross-Origin Resource Sharing) rules for the bucket. You can configure up to 100 rules. Each value of `cors_rules` as defined below.
+    (Required) `name` - Unique identifier of the metrics configuration for the bucket. Must be less than or equal to 64 characters in length.
+    (Optional) `filter` - Object filtering that accepts a prefix, tags, or a logical AND of prefix and tags. `filter` block as defined below.
+      (Optional) `prefix` - Limit this filter to a single prefix.
+      (Optional) `tags` - Limit this filter to the key/value pairs. Up to 10 key/value pairs.
+  EOF
+  type = list(object({
+    name = string
+    filter = optional(object({
+      prefix = optional(string)
+      tags   = optional(map(string), {})
+    }))
+  }))
+  default  = []
+  nullable = false
+}
+
 variable "requester_payment_enabled" {
   description = "(Optional) Whether the requester pays for requests and data transfer costs, and anonymous access to this bucket is disabled. Defaults to `false`."
   type        = bool

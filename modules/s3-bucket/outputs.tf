@@ -73,8 +73,8 @@ output "encryption" {
   description = "The configuration for the S3 bucket Server-Side Encryption."
   value = {
     type               = var.encryption.type
-    kms_key            = try(one(aws_s3_bucket_server_side_encryption_configuration.this.rule.*).apply_server_side_encryption_by_default[0].kms_master_key_id, null)
-    bucket_key_enabled = one(aws_s3_bucket_server_side_encryption_configuration.this.rule.*).bucket_key_enabled
+    kms_key            = try(one(aws_s3_bucket_server_side_encryption_configuration.this.rule[*]).apply_server_side_encryption_by_default[0].kms_master_key_id, null)
+    bucket_key_enabled = one(aws_s3_bucket_server_side_encryption_configuration.this.rule[*]).bucket_key_enabled
   }
 }
 
@@ -93,7 +93,7 @@ output "access_control" {
       restrict_public_buckets_enabled = aws_s3_bucket_public_access_block.this.restrict_public_buckets
     }
     cors_rules = {
-      for rule in try(one(aws_s3_bucket_cors_configuration.this.*).cors_rule, []) :
+      for rule in try(one(aws_s3_bucket_cors_configuration.this[*]).cors_rule, []) :
       rule.id => {
         allowed_headers = rule.allowed_headers
         allowed_methods = rule.allowed_methods
@@ -113,6 +113,18 @@ output "logging" {
       bucket     = var.logging_s3_bucket
       key_prefix = var.logging_s3_key_prefix
     }
+  }
+}
+
+output "monitoring" {
+  description = "The monitoring configuration for the bucket."
+  value = {
+    request_metrics = [
+      for name, metric in aws_s3_bucket_metric.this : {
+        name   = name
+        filter = one(metric.filter[*])
+      }
+    ]
   }
 }
 

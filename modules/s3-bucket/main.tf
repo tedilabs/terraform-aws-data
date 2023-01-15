@@ -25,7 +25,6 @@ locals {
 # TODO: aws_s3_bucket_intelligent_tiering_configuration
 # TODO: aws_s3_bucket_inventory
 # TODO: aws_s3_bucket_notification
-# TODO: aws_s3_bucket_metric
 # TODO: aws_s3_object
 resource "aws_s3_bucket" "this" {
   bucket        = var.name
