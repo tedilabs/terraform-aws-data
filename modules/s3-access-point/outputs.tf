@@ -33,7 +33,7 @@ output "network_origin" {
 
 output "vpc_id" {
   description = ""
-  value       = one(aws_s3_access_point.this.vpc_configuration.*.vpc_id)
+  value       = one(aws_s3_access_point.this.vpc_configuration[*].vpc_id)
 }
 
 output "domain_name" {
@@ -49,9 +49,9 @@ output "endpoints" {
 output "block_public_access" {
   description = "The configuration for the S3 bucket access control."
   value = {
-    block_public_acls_enabled       = one(aws_s3_access_point.this.public_access_block_configuration.*).block_public_acls
-    ignore_public_acls_enabled      = one(aws_s3_access_point.this.public_access_block_configuration.*).ignore_public_acls
-    block_public_policy_enabled     = one(aws_s3_access_point.this.public_access_block_configuration.*).block_public_policy
-    restrict_public_buckets_enabled = one(aws_s3_access_point.this.public_access_block_configuration.*).restrict_public_buckets
+    block_public_acls_enabled       = one(aws_s3_access_point.this.public_access_block_configuration[*]).block_public_acls
+    ignore_public_acls_enabled      = one(aws_s3_access_point.this.public_access_block_configuration[*]).ignore_public_acls
+    block_public_policy_enabled     = one(aws_s3_access_point.this.public_access_block_configuration[*]).block_public_policy
+    restrict_public_buckets_enabled = one(aws_s3_access_point.this.public_access_block_configuration[*]).restrict_public_buckets
   }
 }

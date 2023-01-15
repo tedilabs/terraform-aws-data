@@ -105,6 +105,35 @@ module "bucket" {
   logging_s3_bucket     = null
   logging_s3_key_prefix = null
 
+  request_metrics = [
+    {
+      name = "all"
+    },
+    {
+      name = "john"
+      filter = {
+        prefix = "john/"
+      }
+    },
+    {
+      name = "finance"
+      filter = {
+        tags = {
+          "Team" = "Finance"
+        }
+      }
+    },
+    {
+      name = "finance-john"
+      filter = {
+        prefix = "john/"
+        tags = {
+          "Team" = "Finance"
+        }
+      }
+    },
+  ]
+
 
   ## Misc
   requester_payment_enabled     = true
