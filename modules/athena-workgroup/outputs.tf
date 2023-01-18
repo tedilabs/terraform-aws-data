@@ -40,7 +40,7 @@ output "cloudwatch_metrics_enabled" {
 
 output "query_on_s3_requester_pays_bucket_enabled" {
   description = "Whether members assigned to a workgroup to reference Amazon S3 Requester Pays buckets in queries are allowed."
-  value       = var.cloudwatch_metrics_enabled
+  value       = var.query_on_s3_requester_pays_bucket_enabled
 }
 
 output "per_query_data_usage_limit" {

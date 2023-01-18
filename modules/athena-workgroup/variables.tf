@@ -10,7 +10,7 @@ variable "description" {
 }
 
 variable "enabled" {
-  description = "(Optional) "
+  description = "(Optional) Whether to enable the workgroup. Defaults to `true`."
   type        = bool
   default     = true
 }
@@ -26,6 +26,7 @@ variable "client_config_enabled" {
   type        = bool
   default     = false
 }
+
 variable "cloudwatch_metrics_enabled" {
   description = "(Optional) Whether Amazon CloudWatch metrics are enabled for the workgroup. Defaults to `true`."
   type        = bool
