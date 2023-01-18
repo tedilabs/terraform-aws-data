@@ -19,14 +19,10 @@ resource "aws_s3_access_point" "this" {
   }
 
   public_access_block_configuration {
-    block_public_acls = (var.block_public_access.enabled
-    || var.block_public_access.block_public_acls_enabled)
-    ignore_public_acls = (var.block_public_access.enabled
-    || var.block_public_access.ignore_public_acls_enabled)
-    block_public_policy = (var.block_public_access.enabled
-    || var.block_public_access.block_public_policy_enabled)
-    restrict_public_buckets = (var.block_public_access.enabled
-    || var.block_public_access.restrict_public_buckets_enabled)
+    block_public_acls       = (var.block_public_access.enabled || var.block_public_access.block_public_acls_enabled)
+    ignore_public_acls      = (var.block_public_access.enabled || var.block_public_access.ignore_public_acls_enabled)
+    block_public_policy     = (var.block_public_access.enabled || var.block_public_access.block_public_policy_enabled)
+    restrict_public_buckets = (var.block_public_access.enabled || var.block_public_access.restrict_public_buckets_enabled)
   }
 
   lifecycle {

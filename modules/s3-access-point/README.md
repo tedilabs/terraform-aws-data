@@ -49,10 +49,10 @@ No modules.
 | <a name="output_arn"></a> [arn](#output\_arn) | The ARN of the S3 Access Point. |
 | <a name="output_block_public_access"></a> [block\_public\_access](#output\_block\_public\_access) | The configuration for the S3 bucket access control. |
 | <a name="output_bucket"></a> [bucket](#output\_bucket) | The bucket assoicated to this Access Point. |
-| <a name="output_domain_name"></a> [domain\_name](#output\_domain\_name) | The DNS domain name of the S3 Access Point in the format `name-account_id.s3-accesspoint.region.amazonaws.com`. Note: S3 access points only support secure access by HTTPS. HTTP isn't supported. |
+| <a name="output_domain_name"></a> [domain\_name](#output\_domain\_name) | The DNS domain name of the S3 Access Point in the format `{name-account_id}.s3-accesspoint.{region}.amazonaws.com`. Note: S3 access points only support secure access by HTTPS. HTTP isn't supported. |
 | <a name="output_endpoints"></a> [endpoints](#output\_endpoints) | The VPC endpoints for the S3 Access Point. |
 | <a name="output_id"></a> [id](#output\_id) | The ID of the S3 Access Point. |
 | <a name="output_name"></a> [name](#output\_name) | The name of the S3 Access Point. |
 | <a name="output_network_origin"></a> [network\_origin](#output\_network\_origin) | Indicates whether this access point allows access from the public Internet. Values are `VPC` (the access point doesn't allow access from the public Internet) and `INTERNET` (the access point allows access from the public Internet, subject to the access point and bucket access policies). |
-| <a name="output_vpc_id"></a> [vpc\_id](#output\_vpc\_id) | n/a |
+| <a name="output_vpc_id"></a> [vpc\_id](#output\_vpc\_id) | The VPC ID is to be only allowed connections to this access point if `network_origin` is `VPC`. |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

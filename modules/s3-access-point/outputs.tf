@@ -32,12 +32,12 @@ output "network_origin" {
 }
 
 output "vpc_id" {
-  description = ""
+  description = "The VPC ID is to be only allowed connections to this access point if `network_origin` is `VPC`."
   value       = one(aws_s3_access_point.this.vpc_configuration[*].vpc_id)
 }
 
 output "domain_name" {
-  description = "The DNS domain name of the S3 Access Point in the format `name-account_id.s3-accesspoint.region.amazonaws.com`. Note: S3 access points only support secure access by HTTPS. HTTP isn't supported."
+  description = "The DNS domain name of the S3 Access Point in the format `{name-account_id}.s3-accesspoint.{region}.amazonaws.com`. Note: S3 access points only support secure access by HTTPS. HTTP isn't supported."
   value       = aws_s3_access_point.this.domain_name
 }
 
