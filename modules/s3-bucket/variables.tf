@@ -83,9 +83,8 @@ variable "object_lock" {
   nullable = false
 
   validation {
-    condition = (
-      var.object_lock.default_retention == null
-      || alltrue([
+    condition = var.object_lock.default_retention == null ? true : (
+      alltrue([
         contains(["COMPLIANCE", "GOVERNANCE"], var.object_lock.default_retention.mode),
         contains(["DAYS", "YEARS"], var.object_lock.default_retention.unit),
       ])
