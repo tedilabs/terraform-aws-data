@@ -27,6 +27,7 @@ Terraform Modules from [this package](https://github.com/tedilabs/terraform-aws-
 ### S3 Bucket
 
 - [Full S3 Bucket](./examples/s3-bucket-full)
+- [S3 Bucket with Access Logging](./examples/s3-bucket-access-logging)
 - [S3 Bucket with Server-Side Encryption](./examples/s3-bucket-encryption)
 - [S3 Bucket with Lifecycle Rules](./examples/s3-bucket-lifecycle-rules)
 - [S3 Bucket with Versioning](./examples/s3-bucket-versioning)
