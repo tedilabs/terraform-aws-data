@@ -108,11 +108,12 @@ output "access_control" {
 output "logging" {
   description = "The logging configuration for the bucket."
   value = {
-    enabled = var.logging_enabled
-    s3 = {
-      bucket     = var.logging_s3_bucket
-      key_prefix = var.logging_s3_key_prefix
-    }
+    enabled       = var.logging.enabled
+    s3_bucket     = one(aws_s3_bucket_logging.this[*].target_bucket)
+    s3_key_prefix = one(aws_s3_bucket_logging.this[*].target_prefix)
+
+    is_target_bucket       = var.logging.is_target_bucket
+    allowed_source_buckets = var.logging.allowed_source_buckets
   }
 }
 
