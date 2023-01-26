@@ -101,9 +101,11 @@ module "bucket" {
 
 
   ## Logging & Metrics
-  logging_enabled       = false
-  logging_s3_bucket     = null
-  logging_s3_key_prefix = null
+  logging = {
+    enabled       = true
+    s3_bucket     = module.log_bucket.name
+    s3_key_prefix = ""
+  }
 
   request_metrics = [
     {
@@ -138,6 +140,24 @@ module "bucket" {
   ## Misc
   requester_payment_enabled     = true
   transfer_acceleration_enabled = true
+
+  tags = {
+    "project" = "terraform-aws-data-examples"
+  }
+}
+
+module "log_bucket" {
+  source = "../../modules/s3-bucket"
+  # source  = "tedilabs/data/aws//modules/s3-bucket"
+  # version = "~> 0.2.0"
+
+  name          = "${local.bucket_name}-log"
+  force_destroy = true
+
+  logging = {
+    is_target_bucket       = true
+    allowed_source_buckets = ["${local.bucket_name}-*"]
+  }
 
   tags = {
     "project" = "terraform-aws-data-examples"

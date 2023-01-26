@@ -260,23 +260,26 @@ variable "tls_required" {
   nullable    = false
 }
 
-variable "logging_enabled" {
-  description = "(Optional) Whether to enable S3 bucket logging for the access log. Defaults to `false`."
-  type        = bool
-  default     = false
-  nullable    = false
-}
+variable "logging" {
+  description = <<EOF
+  (Optional) A configurations of Server Access Logging for the S3 bucket.
+    (Optional) `enabled` - Whether to enable S3 bucket logging for the access log. Defaults to `false`.
+    (Optional) `s3_bucket` - The name of the bucket to deliver logs to.
+    (Optional) `s3_key_prefix` - The key prefix to append to log objects.
 
-variable "logging_s3_bucket" {
-  description = "(Optional) The name of the bucket that will receive the log objects."
-  type        = string
-  default     = null
-}
+    (Optional) `is_target_bucket` - Whether this bucket is the target bucket for Server Access Logging.
+    (Optional) `allowed_source_buckets` - A list of names of S3 buckets allowed to write logs to this target bucket. Each source bucket should be owned by same AWS account ID with target bucket. Only used if `is_target_bucket` is `true`.
+  EOF
+  type = object({
+    enabled       = optional(bool, false)
+    s3_bucket     = optional(string)
+    s3_key_prefix = optional(string)
 
-variable "logging_s3_key_prefix" {
-  description = "(Optional) To specify a key prefix of log objects."
-  type        = string
-  default     = null
+    is_target_bucket       = optional(bool, false)
+    allowed_source_buckets = optional(list(string), [])
+  })
+  default  = {}
+  nullable = false
 }
 
 variable "request_metrics" {
