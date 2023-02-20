@@ -71,6 +71,11 @@ jobs:
     - name: Set-up terraform
       uses: hashicorp/setup-terraform@v2
 
+    - name: Set-up tflint
+      uses: terraform-linters/setup-tflint@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Terraform fmt
       id: terraform-fmt
       working-directory: ${{ matrix.path }}
@@ -83,6 +88,18 @@ jobs:
       run: |
         terraform init -backend=false
         terraform validate -no-color
+
+    - name: Terraform Lint
+      id: terraform-lint
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        tflint --version
+        tflint --init
+        tflint \
+          --format compact \
+          --config $(realpath .tflint.hcl) \
+          --chdir ${{ matrix.path }}
 
 
   yaml:
