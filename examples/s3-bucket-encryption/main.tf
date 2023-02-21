@@ -57,7 +57,8 @@ module "bucket_kms" {
 }
 
 module "kms_key" {
-  source = "tedilabs/secret/aws//modules/kms-key"
+  source  = "tedilabs/secret/aws//modules/kms-key"
+  version = "~> 0.3.0"
 
   name = local.kms_key_name
 
