@@ -60,20 +60,25 @@ jobs:
         echo "changed_directories=${{ steps.changed-directories.outputs.all_changed_files }}" >> $GITHUB_OUTPUT
         echo "modified_directories=${{ steps.changed-directories.outputs.all_modified_files }}" >> $GITHUB_OUTPUT
 
-  # tfsec:
-  #   name: Security Test (tfsec)
-  #   uses: tedilabs/.github/.github/workflows/terraform.tfsec.yaml@main
-  #   with:
-  #     tfsec_version: latest
-  #     tfsec_config_file: .tfsec.yaml
-  #     tfsec_target_dir: core/account
-  #     tfsec_sarif_enabled: false
-  #
-  #   permissions:
-  #     actions: read
-  #     contents: read
-  #     security-events: write
-  #     pull-requests: write
+
+  terraform:
+    name: Lint (terraform)
+    needs:
+    - changed
+    if: ${{ needs.changed.outputs.modified == 'true' }}
+    uses: tedilabs/.github/.github/workflows/terraform.terraform.yaml@main
+
+    strategy:
+      matrix:
+        path: ${{ fromJson(needs.changed.outputs.modified_directories) }}
+
+    with:
+      terraform_target_dir: ${{ matrix.path }}
+      terraform_version: latest
+      terraform_host: app.terraform.io
+    secrets:
+      terraform_token: ${{ secrets.TERRAFORM_TOKEN }}
+
 
   tflint:
     name: Lint (tflint)
