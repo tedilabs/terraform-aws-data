@@ -1,6 +1,6 @@
 locals {
   metadata = {
-    package = "terraform-aws-network"
+    package = "terraform-aws-data"
     version = trimspace(file("${path.module}/../../VERSION"))
     module  = basename(path.module)
     name    = var.name
