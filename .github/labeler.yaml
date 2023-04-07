@@ -1,6 +1,8 @@
 # Modules
 ":floppy_disk: athena-workgroup":
 - modules/athena-workgroup/**/*
+":floppy_disk: quicksight-folder":
+- modules/quicksight-folder/**/*
 ":floppy_disk: quicksight-group":
 - modules/quicksight-group/**/*
 ":floppy_disk: s3-access-point":
