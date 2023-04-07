@@ -37,14 +37,24 @@ variable "permissions" {
       - The ARN of an Amazon QuickSight user or group associated with a data source or dataset. (This is common.)
       - The ARN of an Amazon QuickSight user, group, or namespace associated with an analysis, dashboard, template, or theme. (This is common.)
       - The ARN of an Amazon Web Services account root: This is an IAM ARN rather than a QuickSight ARN. Use this option only to share resources (templates) across Amazon Web Services accounts. (This is less common.)
-    (Required) `actions` - A set of IAM actions to grant or revoke permissions on.
+    (Optional) `role` - A role of principal with a pre-defined set of permissions. Valid values are `OWNER` and `READER`.
+    (Optional) `actions` - A set of IAM actions to grant or revoke permissions on.
   EOF
   type = list(object({
     principal = string
-    actions   = set(string)
+    role      = optional(string)
+    actions   = optional(set(string), [])
   }))
   default  = []
   nullable = false
+
+  validation {
+    condition = alltrue([
+      for permission in var.permissions :
+      contains(["OWNER", "READER"], permission.role)
+    ])
+    error_message = "Valid values for `permission.role` are `OWNER` and `READER`."
+  }
 }
 
 variable "tags" {

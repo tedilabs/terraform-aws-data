@@ -14,6 +14,23 @@ locals {
   } : {}
 }
 
+locals {
+  role_actions = {
+    "OWNER" = [
+      "quicksight:CreateFolder",
+      "quicksight:DescribeFolder",
+      "quicksight:UpdateFolder",
+      "quicksight:DeleteFolder",
+      "quicksight:CreateFolderMembership",
+      "quicksight:DeleteFolderMembership",
+      "quicksight:DescribeFolderPermissions",
+      "quicksight:UpdateFolderPermissions",
+    ]
+    "READER" = [
+      "quicksight:DescribeFolder",
+    ]
+  }
+}
 
 ###################################################
 # QuickSight Folder
@@ -29,10 +46,11 @@ resource "aws_quicksight_folder" "this" {
 
   dynamic "permissions" {
     for_each = var.permissions
+    iterator = permission
 
     content {
-      principal = each.value.principal
-      actions   = each.value.actions
+      principal = permission.value.principal
+      actions   = try(local.role_actions[permission.value.role], permission.value.actions)
     }
   }
 
