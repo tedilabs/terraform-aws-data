@@ -16,7 +16,6 @@ variable "type" {
   type        = string
   default     = "SHARED"
   nullable    = false
-
   validation {
     condition     = contains(["SHARED"], var.type)
     error_message = "Valid values for `type` are `SHARED`."
@@ -55,6 +54,22 @@ variable "permissions" {
     ])
     error_message = "Valid values for `permission.role` are `OWNER` and `READER`."
   }
+}
+
+variable "assets" {
+  description = <<EOF
+  (Optional) A configuration for assets of this QuickSight folder. `assets` as defined below.
+    (Optional) `analyses` - A list of the IDs of the analysis assets to add to this QuickSight folder.
+    (Optional) `dashboards` - A list of the IDs of the dashboard assets to add to this QuickSight folder.
+    (Optional) `datasets` - A list of the IDs of the dataset assets to add to this QuickSight folder.
+  EOF
+  type = object({
+    analyses   = optional(list(string), [])
+    dashboards = optional(list(string), [])
+    datasets   = optional(list(string), [])
+  })
+  default  = {}
+  nullable = false
 }
 
 variable "tags" {

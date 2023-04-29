@@ -3,6 +3,7 @@
 This module creates following resources.
 
 - `aws_quicksight_folder`
+- `aws_quicksight_folder_membership` (optional)
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
@@ -10,13 +11,13 @@ This module creates following resources.
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.62 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.65 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | 4.62.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | 4.65.0 |
 
 ## Modules
 
@@ -29,12 +30,16 @@ This module creates following resources.
 | Name | Type |
 |------|------|
 | [aws_quicksight_folder.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/quicksight_folder) | resource |
+| [aws_quicksight_folder_membership.analysis](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/quicksight_folder_membership) | resource |
+| [aws_quicksight_folder_membership.dashboard](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/quicksight_folder_membership) | resource |
+| [aws_quicksight_folder_membership.dataset](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/quicksight_folder_membership) | resource |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_name"></a> [name](#input\_name) | (Required) An identifier for the QuickSight folder. | `string` | n/a | yes |
+| <a name="input_assets"></a> [assets](#input\_assets) | (Optional) A configuration for assets of this QuickSight folder. `assets` as defined below.<br>    (Optional) `analyses` - A list of the IDs of the analysis assets to add to this QuickSight folder.<br>    (Optional) `dashboards` - A list of the IDs of the dashboard assets to add to this QuickSight folder.<br>    (Optional) `datasets` - A list of the IDs of the dataset assets to add to this QuickSight folder. | <pre>object({<br>    analyses   = optional(list(string), [])<br>    dashboards = optional(list(string), [])<br>    datasets   = optional(list(string), [])<br>  })</pre> | `{}` | no |
 | <a name="input_display_name"></a> [display\_name](#input\_display\_name) | (Optional) A display name for the QuickSight folder. | `string` | `null` | no |
 | <a name="input_module_tags_enabled"></a> [module\_tags\_enabled](#input\_module\_tags\_enabled) | (Optional) Whether to create AWS Resource Tags for the module informations. | `bool` | `true` | no |
 | <a name="input_parent_folder"></a> [parent\_folder](#input\_parent\_folder) | (Optional) The Amazon Resource Name (ARN) for the parent folder. If not set, creates a root-level folder. | `string` | `null` | no |
@@ -50,6 +55,7 @@ This module creates following resources.
 | Name | Description |
 |------|-------------|
 | <a name="output_arn"></a> [arn](#output\_arn) | The ARN of the QuickSight folder. |
+| <a name="output_assets"></a> [assets](#output\_assets) | A configuration for assets of this QuickSight folder.<br>    `analyses` - A list of the IDs of the analysis assets of this QuickSight folder.<br>    `dashboards` - A list of the IDs of the dashboard assets of this QuickSight folder.<br>    `datasets` - A list of the IDs of the dataset assets of this QuickSight folder. |
 | <a name="output_created_at"></a> [created\_at](#output\_created\_at) | The time that the QuickSight folder was created. |
 | <a name="output_display_name"></a> [display\_name](#output\_display\_name) | The display name of the QuickSight folder. |
 | <a name="output_hierarchy"></a> [hierarchy](#output\_hierarchy) | The hierarchy of the QuickSight folder. |
