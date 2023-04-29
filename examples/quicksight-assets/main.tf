@@ -18,6 +18,12 @@ module "folder__dev" {
 
   permissions = []
 
+  assets = {
+    analyses   = []
+    dashboards = []
+    datasets   = []
+  }
+
   tags = {
     "project" = "terraform-aws-data-examples"
   }
@@ -33,6 +39,12 @@ module "folder__test" {
   parent_folder = null
 
   permissions = []
+
+  assets = {
+    analyses   = []
+    dashboards = []
+    datasets   = []
+  }
 
   tags = {
     "project" = "terraform-aws-data-examples"
