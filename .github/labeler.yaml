@@ -5,6 +5,8 @@
 - modules/quicksight-folder/**/*
 ":floppy_disk: quicksight-group":
 - modules/quicksight-group/**/*
+":floppy_disk: quicksight-namespace":
+- modules/quicksight-namespace/**/*
 ":floppy_disk: s3-access-point":
 - modules/s3-access-point/**/*
 ":floppy_disk: s3-bucket":

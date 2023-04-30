@@ -9,6 +9,7 @@ Terraform module which creates data related resources on AWS.
 - [athena-workgroup](./modules/athena-workgroup)
 - [quicksight-folder](./modules/quicksight-folder)
 - [quicksight-group](./modules/quicksight-group)
+- [quicksight-namespace](./modules/quicksight-namespace)
 - [s3-access-point](./modules/s3-access-point)
 - [s3-bucket](./modules/s3-bucket)
 
@@ -20,8 +21,9 @@ Terraform Modules from [this package](https://github.com/tedilabs/terraform-aws-
 - **AWS Athena**
   - Workgroup
 - **AWS QuickSight**
-  - Group & Group Membership
   - Folder
+  - Group & Group Membership
+  - Namespace
 - **AWS S3**
   - S3 Bucket
   - S3 Access Point
