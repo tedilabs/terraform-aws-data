@@ -16,6 +16,7 @@ variable "type" {
   type        = string
   default     = "SHARED"
   nullable    = false
+
   validation {
     condition     = contains(["SHARED"], var.type)
     error_message = "Valid values for `type` are `SHARED`."
