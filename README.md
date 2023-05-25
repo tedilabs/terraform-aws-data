@@ -6,6 +6,7 @@
 
 Terraform module which creates data related resources on AWS.
 
+- [athena-data-catalog](./modules/athena-data-catalog)
 - [athena-workgroup](./modules/athena-workgroup)
 - [quicksight-folder](./modules/quicksight-folder)
 - [quicksight-group](./modules/quicksight-group)
@@ -19,6 +20,7 @@ Terraform module which creates data related resources on AWS.
 Terraform Modules from [this package](https://github.com/tedilabs/terraform-aws-data) were written to manage the following AWS Services with Terraform.
 
 - **AWS Athena**
+  - Data Catalog
   - Workgroup
 - **AWS QuickSight**
   - Folder
