@@ -41,6 +41,9 @@
 
 # Modules
 - color: "fbca04"
+  description: "This issue or pull request is related to access-data-catalog module."
+  name: ":floppy_disk: athena-data-catalog"
+- color: "fbca04"
   description: "This issue or pull request is related to access-workgroup module."
   name: ":floppy_disk: athena-workgroup"
 - color: "fbca04"

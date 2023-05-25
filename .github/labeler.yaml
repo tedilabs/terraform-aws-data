@@ -1,4 +1,6 @@
 # Modules
+":floppy_disk: athena-data-catalog":
+- modules/athena-data-catalog/**/*
 ":floppy_disk: athena-workgroup":
 - modules/athena-workgroup/**/*
 ":floppy_disk: quicksight-folder":
