@@ -3,6 +3,8 @@
 - modules/athena-data-catalog/**/*
 ":floppy_disk: athena-workgroup":
 - modules/athena-workgroup/**/*
+":floppy_disk: glue-data-catalog":
+- modules/glue-data-catalog/**/*
 ":floppy_disk: quicksight-folder":
 - modules/quicksight-folder/**/*
 ":floppy_disk: quicksight-group":

@@ -8,6 +8,7 @@ Terraform module which creates data related resources on AWS.
 
 - [athena-data-catalog](./modules/athena-data-catalog)
 - [athena-workgroup](./modules/athena-workgroup)
+- [glue-data-catalog](./modules/glue-data-catalog)
 - [quicksight-folder](./modules/quicksight-folder)
 - [quicksight-group](./modules/quicksight-group)
 - [quicksight-namespace](./modules/quicksight-namespace)
@@ -22,6 +23,11 @@ Terraform Modules from [this package](https://github.com/tedilabs/terraform-aws-
 - **AWS Athena**
   - Data Catalog
   - Workgroup
+- **AWS Glue**
+  - Data Catalog
+    - Data Catalog
+    - Database
+    - Table (Comming Soon!)
 - **AWS QuickSight**
   - Folder
   - Group & Group Membership
@@ -32,6 +38,15 @@ Terraform Modules from [this package](https://github.com/tedilabs/terraform-aws-
 
 
 ## Examples
+
+### Athena
+
+- [Athena Workgroup](./examples/athena-workgroup)
+
+### Glue
+
+- [Glue Data Catalog (Simple)](./examples/glue-data-catalog-simple)
+- [Glue Data Catalog (Full)](./examples/glue-data-catalog-full)
 
 ### QuickSight
 
