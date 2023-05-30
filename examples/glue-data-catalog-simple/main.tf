@@ -23,3 +23,38 @@ module "data_catalog" {
     "project" = "terraform-aws-data-examples"
   }
 }
+
+
+###################################################
+# Glue Database
+###################################################
+
+module "database" {
+  source = "../../modules/glue-database"
+  # source  = "tedilabs/data/aws//modules/glue-database"
+  # version = "~> 0.2.0"
+
+  name = "example"
+
+  tags = {
+    "project" = "terraform-aws-data-examples"
+  }
+}
+
+
+###################################################
+# Glue Table
+###################################################
+
+module "table" {
+  source = "../../modules/glue-table"
+  # source  = "tedilabs/data/aws//modules/glue-table"
+  # version = "~> 0.2.0"
+
+  database = module.database.name
+  name     = "helloworld"
+
+  tags = {
+    "project" = "terraform-aws-data-examples"
+  }
+}

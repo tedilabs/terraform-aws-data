@@ -44,6 +44,46 @@ data "aws_iam_policy_document" "this" {
   }
 }
 
+locals {
+  databases = [
+    {
+      name        = "foo"
+      description = "Hello, foo"
+      tables = [
+        {
+          name       = "foo1"
+          descrition = "Hey, foo1"
+        },
+        {
+          name       = "foo2"
+          descrition = "Hey, foo2"
+        },
+      ]
+    },
+    {
+      name        = "bar"
+      description = "Hello, bar"
+      tables = [
+        {
+          name       = "bar1"
+          descrition = "Hey, bar1"
+        },
+        {
+          name       = "bar2"
+          descrition = "Hey, bar2"
+        },
+      ]
+    }
+  ]
+  tables = flatten([
+    for database in try(local.databases, []) : [
+      for table in try(database.tables, []) :
+      merge(table, {
+        database = database.name
+      })
+    ]
+  ])
+}
 
 ###################################################
 # KMS Keys for Glue
@@ -89,6 +129,58 @@ module "data_catalog" {
     enabled = true
     kms_key = module.kms_key.arn
   }
+
+  tags = {
+    "project" = "terraform-aws-data-examples"
+  }
+}
+
+
+###################################################
+# Glue Database
+###################################################
+
+module "database" {
+  source = "../../modules/glue-database"
+  # source  = "tedilabs/data/aws//modules/glue-database"
+  # version = "~> 0.2.0"
+
+  for_each = {
+    for database in try(local.databases, []) :
+    database.name => database
+  }
+
+  catalog = try(each.value.catalog, null)
+
+  name         = each.key
+  description  = try(each.value.description, "Managed by Terraform.")
+  location_uri = try(each.value.location_uri, "")
+
+  tags = {
+    "project" = "terraform-aws-data-examples"
+  }
+}
+
+
+###################################################
+# Glue Table
+###################################################
+
+module "table" {
+  source = "../../modules/glue-table"
+  # source  = "tedilabs/data/aws//modules/glue-table"
+  # version = "~> 0.2.0"
+
+  for_each = {
+    for table in try(local.tables, []) :
+    "${table.database}/${table.name}" => table
+  }
+
+  catalog  = try(each.value.catalog, null)
+  database = module.database[each.value.database].name
+
+  name        = each.value.name
+  description = try(each.value.description, "Managed by Terraform.")
 
   tags = {
     "project" = "terraform-aws-data-examples"
