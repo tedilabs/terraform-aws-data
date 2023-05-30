@@ -5,6 +5,10 @@
 - modules/athena-workgroup/**/*
 ":floppy_disk: glue-data-catalog":
 - modules/glue-data-catalog/**/*
+":floppy_disk: glue-database":
+- modules/glue-database/**/*
+":floppy_disk: glue-table":
+- modules/glue-table/**/*
 ":floppy_disk: quicksight-folder":
 - modules/quicksight-folder/**/*
 ":floppy_disk: quicksight-group":
