@@ -14,24 +14,6 @@ locals {
   } : {}
 }
 
-locals {
-  role_actions = {
-    "OWNER" = [
-      "quicksight:CreateFolder",
-      "quicksight:DescribeFolder",
-      "quicksight:UpdateFolder",
-      "quicksight:DeleteFolder",
-      "quicksight:CreateFolderMembership",
-      "quicksight:DeleteFolderMembership",
-      "quicksight:DescribeFolderPermissions",
-      "quicksight:UpdateFolderPermissions",
-    ]
-    "READER" = [
-      "quicksight:DescribeFolder",
-    ]
-  }
-}
-
 
 ###################################################
 # QuickSight Namespace
