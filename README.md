@@ -8,6 +8,7 @@ Terraform module which creates data related resources on AWS.
 
 - [athena-data-catalog](./modules/athena-data-catalog)
 - [athena-workgroup](./modules/athena-workgroup)
+- [glue-crawler](./modules/glue-crawler)
 - [glue-data-catalog](./modules/glue-data-catalog)
 - [glue-database](./modules/glue-database)
 - [glue-table](./modules/glue-table)
@@ -27,6 +28,7 @@ Terraform Modules from [this package](https://github.com/tedilabs/terraform-aws-
   - Workgroup
 - **AWS Glue**
   - Data Catalog
+    - Crawler
     - Data Catalog
     - Database
     - Table
