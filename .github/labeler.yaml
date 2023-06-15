@@ -3,6 +3,8 @@
 - modules/athena-data-catalog/**/*
 ":floppy_disk: athena-workgroup":
 - modules/athena-workgroup/**/*
+":floppy_disk: glue-connection":
+- modules/glue-connection/**/*
 ":floppy_disk: glue-crawler":
 - modules/glue-crawler/**/*
 ":floppy_disk: glue-data-catalog":
