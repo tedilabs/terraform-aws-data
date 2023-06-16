@@ -15,6 +15,10 @@ locals {
 }
 
 
+###################################################
+# Database for Glue Data Catalog
+###################################################
+
 # - create_table_default_permission
 #   - permissions
 #   - principal

@@ -14,7 +14,7 @@ output "catalog" {
 }
 
 output "database" {
-  description = " The catalog database in which to create the new table."
+  description = "The catalog database in which to create the new table."
   value       = aws_glue_catalog_table.this.database_name
 }
 
