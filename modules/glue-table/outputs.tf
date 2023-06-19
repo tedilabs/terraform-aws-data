@@ -28,13 +28,48 @@ output "description" {
   value       = aws_glue_catalog_table.this.description
 }
 
-# output "z" {
-#   value       = {
-#     for k, v in aws_glue_catalog_table.this :
-#     k => v
-#     if !contains(["name", "description", "catalog_id", "database_name", "arn", "id", "tags", "tags_all"], k)
-#   }
-# }
+output "owner" {
+  description = "The table owner."
+  value       = aws_glue_catalog_table.this.owner
+}
+
+output "input_format" {
+  description = "Absolute class name of the Hadoop `InputFormat` to use when reading table files."
+  value       = one(aws_glue_catalog_table.this.storage_descriptor[*].input_format)
+}
+
+output "output_format" {
+  description = "Absolute class name of the Hadoop `OutputFormat` to use when writing table files."
+  value       = one(aws_glue_catalog_table.this.storage_descriptor[*].output_format)
+}
+
+output "columns" {
+  description = "A list of the configurations for columns in the table."
+  value       = one(aws_glue_catalog_table.this.storage_descriptor[*].columns)
+}
+
+output "parameters" {
+  description = "The properties associated with this table, as a map of key-value pairs."
+  value       = aws_glue_catalog_table.this.parameters
+}
+
+output "z" {
+  description = "The properties associated with this table, as a map of key-value pairs."
+  value = {
+    for k, v in aws_glue_catalog_table.this :
+    k => v
+    if !contains(["name", "description", "catalog_id", "database_name", "arn", "id", "tags", "tags_all", "owner", "parameters", "storage_descriptor"], k)
+  }
+}
+
+output "z_storage_descriptor" {
+  description = "The properties associated with this table, as a map of key-value pairs."
+  value = {
+    for k, v in aws_glue_catalog_table.this.storage_descriptor[0] :
+    k => v
+    if !contains(["input_format", "output_format", "columns"], k)
+  }
+}
 
 output "sharing" {
   description = <<EOF

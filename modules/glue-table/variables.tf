@@ -23,6 +23,91 @@ variable "description" {
   nullable    = false
 }
 
+variable "owner" {
+  description = "(Optional) The table owner. Included for Apache Hive compatibility. Not used in the normal course of Glue operations. Defaults to `terraform`."
+  type        = string
+  default     = "terraform"
+  nullable    = false
+}
+
+variable "input_format" {
+  description = <<EOF
+  (Optional) Absolute class name of the Hadoop `InputFormat` to use when reading table files. Supported values are following:
+    `org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat` - InputFormat for Avro files.
+    `com.amazon.emr.cloudtrail.CloudTrailInputFormat` - InputFormat for Cloudtrail Logs.
+    `org.apache.hadoop.hive.ql.io.orc.OrcInputFormat` - InputFormat for Orc files.
+    `org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat` - InputFormat for Parquet files.
+    `org.apache.hadoop.mapred.TextInputFormat` - An InputFormat for plain text files. Files are broken into lines. Either linefeed or carriage-return are used to signal end of line. Keys are the position in the file, and values are the line of text. JSON & CSV files are examples of this InputFormat
+    `` -
+  EOF
+  type        = string
+  default     = ""
+  nullable    = false
+
+  validation {
+    condition = contains([
+      "",
+      "org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat",
+      "com.amazon.emr.cloudtrail.CloudTrailInputFormat",
+      "org.apache.hadoop.hive.ql.io.orc.OrcInputFormat",
+      "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+      "org.apache.hadoop.mapred.TextInputFormat",
+    ], var.input_format)
+    error_message = "Supported values for `input_format` are `org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat`, `com.amazon.emr.cloudtrail.CloudTrailInputFormat`, `org.apache.hadoop.hive.ql.io.orc.OrcInputFormat`, `org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat`, `org.apache.hadoop.mapred.TextInputFormat`."
+  }
+}
+
+variable "output_format" {
+  description = <<EOF
+  (Optional) Absolute class name of the Hadoop `OutputFormat` to use when writing table files. Supported values are following:
+    `org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat` - Writes text data with a null key (value only).
+    `org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat` - OutputFormat for Avro files.
+    `org.apache.hadoop.hive.ql.io.orc.OrcOutputFormat` - OutputFormat for Orc files.
+    `org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat` - OutputFormat for Parquet files.
+  EOF
+  type        = string
+  default     = ""
+  nullable    = false
+
+  validation {
+    condition = contains([
+      "",
+      "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat",
+      "org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat",
+      "org.apache.hadoop.hive.ql.io.orc.OrcOutputFormat",
+      "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
+    ], var.output_format)
+    error_message = "Supported values for `output_format` are `org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat`, `org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat`, `org.apache.hadoop.hive.ql.io.orc.OrcOutputFormat`, `org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat`."
+  }
+}
+
+variable "columns" {
+  description = <<EOF
+  (Optional) A list of the configurations for columns in the table. Each item of `columns` as defined below.
+    (Required) `name` - The name of the Column.
+    (Required) `type` - The data type of the Column.
+    (Optional) `comment` - A free-form text comment.
+    (Optional) `parameters` - A properties associated with the column, as a map of key-value pairs.
+  EOF
+  type = list(object({
+    name       = string
+    type       = string
+    comment    = optional(string, "")
+    parameters = optional(map(string), {})
+  }))
+  default  = []
+  nullable = false
+}
+
+variable "parameters" {
+  description = <<EOF
+  (Optional) A properties associated with this table, as a map of key-value pairs.
+  EOF
+  type        = map(string)
+  default     = {}
+  nullable    = false
+}
+
 variable "tags" {
   description = "(Optional) A map of tags to add to all resources."
   type        = map(string)

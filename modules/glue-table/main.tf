@@ -20,8 +20,11 @@ locals {
 ###################################################
 
 
-# - owner
-# - parameters
+# EXTERNAL_TABLE
+# Hive compatible attribute - indicates a non-Hive managed table.
+#
+# GOVERNED
+# Used by AWS Lake Formation. The AWS Glue Data Catalog understands GOVERNED
 # - partition_index
 #   - index_name
 #   - keys
@@ -32,12 +35,9 @@ locals {
 # - retention
 # - storage_descriptor
 #   - bucket_columns
-#   - columns
 #   - compressed
-#   - input_format
 #   - location
 #   - number_of_buckets
-#   - output_format
 #   - parameters
 #   - schema_reference
 #   - ser_de_info
@@ -57,4 +57,25 @@ resource "aws_glue_catalog_table" "this" {
 
   name        = var.name
   description = var.description
+  owner       = var.owner
+
+  storage_descriptor {
+    input_format  = var.input_format
+    output_format = var.output_format
+
+    dynamic "columns" {
+      for_each = var.columns
+      iterator = column
+
+      content {
+        name = column.value.name
+        type = column.value.type
+
+        comment    = column.value.comment
+        parameters = column.value.parameters
+      }
+    }
+  }
+
+  parameters = var.parameters
 }
