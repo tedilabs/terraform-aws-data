@@ -20,6 +20,12 @@ locals {
     ? "s3://${trim(var.query_result.s3_bucket, "/")}/${local.query_result_s3_key_prefix}"
     : null
   )
+
+  engine_versions = {
+    "AUTO"  = "AUTO"
+    "ATHENA_V2" = "Athena engine version 2"
+    "ATHENA_V3" = "Athena engine version 3"
+  }
 }
 
 
@@ -37,7 +43,7 @@ resource "aws_athena_workgroup" "this" {
     bytes_scanned_cutoff_per_query     = var.per_query_data_usage_limit
 
     engine_version {
-      selected_engine_version = "AUTO"
+      selected_engine_version = var.engine_version
     }
 
     dynamic "result_configuration" {
@@ -89,7 +95,7 @@ resource "aws_athena_named_query" "this" {
 
   workgroup   = aws_athena_workgroup.this.id
   name        = each.value.name
-  description = try(each.value.description, "Managed by Terraform.")
+  description = each.value.description
 
   database = each.value.database
   query    = each.value.query

@@ -44,3 +44,25 @@ resource "aws_glue_catalog_database" "this" {
     var.tags,
   )
 }
+#
+#
+# ###################################################
+# # LF Tags for Glue Database
+# ###################################################
+#
+# resource "aws_lakeformation_resource_lf_tags" "this" {
+#   catalog_id = var.catalog
+#
+#   database {
+#     name = aws_glue_catalog_database.this.name
+#   }
+#
+#   dynamic "lf_tag" {
+#     for_each = var.lf_tags
+#
+#     content {
+#       key   = lf_tag.key
+#       value = lf_tag.value
+#     }
+#   }
+# }
