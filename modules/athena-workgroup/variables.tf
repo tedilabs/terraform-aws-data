@@ -68,8 +68,15 @@ variable "named_queries" {
     (Required) `database` - The database to which the query belongs.
     (Required) `query` - The text of the query itself. In other words, all query statements. Maximum length of 262144.
   EOF
-  type        = list(map(string))
-  default     = []
+  type = list(object({
+    name        = string
+    description = optional(string, "Managed by Terraform.")
+
+    database = string
+    query    = string
+  }))
+  default  = []
+  nullable = false
 }
 
 variable "tags" {

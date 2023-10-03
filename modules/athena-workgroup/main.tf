@@ -20,6 +20,12 @@ locals {
     ? "s3://${trim(var.query_result.s3_bucket, "/")}/${local.query_result_s3_key_prefix}"
     : null
   )
+
+  engine_versions = {
+    "AUTO"      = "AUTO"
+    "ATHENA_V2" = "Athena engine version 2"
+    "ATHENA_V3" = "Athena engine version 3"
+  }
 }
 
 
