@@ -4,7 +4,7 @@ locals {
   default_grants = [
     {
       type       = "CanonicalUser"
-      id         = data.aws_canonical_user_id.this.id
+      grantee    = data.aws_canonical_user_id.this.id
       permission = "FULL_CONTROL"
     }
   ]
