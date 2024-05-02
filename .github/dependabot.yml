@@ -1,6 +1,24 @@
 version: 2
 updates:
-- package-ecosystem: "github-actions"
-  directory: "/"
+- package-ecosystem: github-actions
+  directory: /
   schedule:
-    interval: "daily"
+    interval: daily
+
+- package-ecosystem: terraform
+  directories:
+  - /modules/athena-data-catalog
+  - /modules/athena-workgroup
+  - /modules/glue-connection
+  - /modules/glue-crawler
+  - /modules/glue-data-catalog
+  - /modules/glue-database
+  - /modules/glue-table
+  - /modules/lakeformation-data-catalog
+  - /modules/quicksight-folder
+  - /modules/quicksight-group
+  - /modules/quicksight-namespace
+  - /modules/s3-access-point
+  - /modules/s3-bucket
+  schedule:
+    interval: weekly
