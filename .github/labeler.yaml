@@ -1,25 +1,60 @@
 # Modules
 ":floppy_disk: athena-data-catalog":
-- modules/athena-data-catalog/**/*
+- changed-files:
+  - any-glob-to-any-file:
+    - modules/athena-data-catalog/**/*
+
 ":floppy_disk: athena-workgroup":
-- modules/athena-workgroup/**/*
+- changed-files:
+  - any-glob-to-any-file:
+    - modules/athena-workgroup/**/*
+
 ":floppy_disk: glue-connection":
-- modules/glue-connection/**/*
+- changed-files:
+  - any-glob-to-any-file:
+    - modules/glue-connection/**/*
+
 ":floppy_disk: glue-crawler":
-- modules/glue-crawler/**/*
+- changed-files:
+  - any-glob-to-any-file:
+    - modules/glue-crawler/**/*
+
 ":floppy_disk: glue-data-catalog":
-- modules/glue-data-catalog/**/*
+- changed-files:
+  - any-glob-to-any-file:
+    - modules/glue-data-catalog/**/*
+
 ":floppy_disk: glue-database":
-- modules/glue-database/**/*
+- changed-files:
+  - any-glob-to-any-file:
+    - modules/glue-database/**/*
+
 ":floppy_disk: glue-table":
-- modules/glue-table/**/*
+- changed-files:
+  - any-glob-to-any-file:
+    - modules/glue-table/**/*
+
 ":floppy_disk: quicksight-folder":
-- modules/quicksight-folder/**/*
+- changed-files:
+  - any-glob-to-any-file:
+    - modules/quicksight-folder/**/*
+
 ":floppy_disk: quicksight-group":
-- modules/quicksight-group/**/*
+- changed-files:
+  - any-glob-to-any-file:
+    - modules/quicksight-group/**/*
+
 ":floppy_disk: quicksight-namespace":
-- modules/quicksight-namespace/**/*
+- changed-files:
+  - any-glob-to-any-file:
+    - modules/quicksight-namespace/**/*
+
 ":floppy_disk: s3-access-point":
-- modules/s3-access-point/**/*
+- changed-files:
+  - any-glob-to-any-file:
+    - modules/s3-access-point/**/*
+
 ":floppy_disk: s3-bucket":
-- modules/s3-bucket/**/*
+- changed-files:
+  - any-glob-to-any-file:
+    - modules/s3-bucket/**/*
