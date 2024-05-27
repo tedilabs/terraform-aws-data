@@ -16,7 +16,7 @@ module "role" {
   count = (var.custom_iam_role == null && var.iam_role.enabled) ? 1 : 0
 
   source  = "tedilabs/account/aws//modules/iam-role"
-  version = "~> 0.25.0"
+  version = "~> 0.30.4"
 
   name        = "aws-glue-crawler-${local.metadata.name}"
   path        = "/"
