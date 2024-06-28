@@ -7,18 +7,6 @@ updates:
 
 - package-ecosystem: terraform
   directories:
-  - /modules/athena-data-catalog
-  - /modules/athena-workgroup
-  - /modules/glue-connection
-  - /modules/glue-crawler
-  - /modules/glue-data-catalog
-  - /modules/glue-database
-  - /modules/glue-table
-  - /modules/lakeformation-data-catalog
-  - /modules/quicksight-folder
-  - /modules/quicksight-group
-  - /modules/quicksight-namespace
-  - /modules/s3-access-point
-  - /modules/s3-bucket
+  - /modules/*
   schedule:
     interval: weekly
