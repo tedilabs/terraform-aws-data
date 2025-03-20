@@ -4,7 +4,7 @@ This module creates following resources.
 
 - `aws_athena_data_catalog`
 
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -54,4 +54,4 @@ This module creates following resources.
 | <a name="output_name"></a> [name](#output\_name) | The name of the data catalog. |
 | <a name="output_parameters"></a> [parameters](#output\_parameters) | A set of key value pairs that specifies the Lambda function or functions to use for creating the data catalog. |
 | <a name="output_type"></a> [type](#output\_type) | The type of the data catalog. |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->

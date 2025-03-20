@@ -5,7 +5,7 @@ This module creates following resources.
 - `aws_lakeformation_data_lake_settings`
 - `aws_lakeformation_lf_tag` (optional)
 
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -45,4 +45,4 @@ No modules.
 |------|-------------|
 | <a name="output_catalog"></a> [catalog](#output\_catalog) | The ID of the Data Catalog. |
 | <a name="output_lf_tags"></a> [lf\_tags](#output\_lf\_tags) | LF-Tags have a key and one or more values that can be associated with data catalog resources. |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->

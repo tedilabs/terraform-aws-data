@@ -4,7 +4,7 @@ This module creates following resources.
 
 - `aws_glue_connection`
 
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -61,4 +61,4 @@ This module creates following resources.
 | <a name="output_properties"></a> [properties](#output\_properties) | A map of key-value pairs used as parameters for this connection. |
 | <a name="output_type"></a> [type](#output\_type) | The type of the connection. |
 | <a name="output_vpc_association"></a> [vpc\_association](#output\_vpc\_association) | A configuration for additional VPC association of the Glue connection when your AWS Glue job needs to run on Amazon Elastic Compute Cloud (EC2) instances in a virtual private cloud (VPC) subnet. |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->

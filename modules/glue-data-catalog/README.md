@@ -8,7 +8,7 @@ This module creates following resources.
 - `aws_ram_principal_association` (optional)
 - `aws_ram_resource_association` (optional)
 
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -64,4 +64,4 @@ This module creates following resources.
 | <a name="output_encryption_for_connection_passwords"></a> [encryption\_for\_connection\_passwords](#output\_encryption\_for\_connection\_passwords) | A configuration to encrypt connection passwords in the data catalog. |
 | <a name="output_policy"></a> [policy](#output\_policy) | The policy to be applied to the aws glue data catalog for access control. |
 | <a name="output_sharing"></a> [sharing](#output\_sharing) | The configuration for sharing of the Glue Data Catalog.<br>    `status` - An indication of whether the data catalog is shared with other AWS accounts, or was shared with the current account by another AWS account. Sharing is configured through AWS Resource Access Manager (AWS RAM). Values are `NOT_SHARED`, `SHARED_BY_ME` or `SHARED_WITH_ME`.<br>    `shares` - The list of resource shares via RAM (Resource Access Manager). |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->

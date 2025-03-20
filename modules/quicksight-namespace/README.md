@@ -4,7 +4,7 @@ This module creates following resources.
 
 - `aws_quicksight_namespace`
 
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -50,4 +50,4 @@ This module creates following resources.
 | <a name="output_capacity_region"></a> [capacity\_region](#output\_capacity\_region) | The AWS Region that you want to use for the free SPICE capacity for the new namespace. |
 | <a name="output_identity_store"></a> [identity\_store](#output\_identity\_store) | The type of user identity directory. |
 | <a name="output_name"></a> [name](#output\_name) | The name of the QuickSight namespace. |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->

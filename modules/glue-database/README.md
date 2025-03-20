@@ -7,7 +7,7 @@ This module creates following resources.
 - `aws_ram_principal_association` (optional)
 - `aws_ram_resource_association` (optional)
 
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -62,4 +62,4 @@ This module creates following resources.
 | <a name="output_name"></a> [name](#output\_name) | The name of the database. |
 | <a name="output_parameters"></a> [parameters](#output\_parameters) | A set of key value pairs that specifies the Lambda function or functions to use for creating the data catalog. |
 | <a name="output_sharing"></a> [sharing](#output\_sharing) | The configuration for sharing of the Glue Database.<br>    `status` - An indication of whether the database is shared with other AWS accounts, or was shared with the current account by another AWS account. Sharing is configured through AWS Resource Access Manager (AWS RAM). Values are `NOT_SHARED`, `SHARED_BY_ME` or `SHARED_WITH_ME`.<br>    `shares` - The list of resource shares via RAM (Resource Access Manager). |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->

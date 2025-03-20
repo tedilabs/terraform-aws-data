@@ -5,7 +5,7 @@ This module creates following resources.
 - `aws_quicksight_group`
 - `aws_quicksight_group_membership` (optional)
 
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -50,4 +50,4 @@ No modules.
 | <a name="output_members"></a> [members](#output\_members) | A set of user names that you want to add to the group membership. |
 | <a name="output_name"></a> [name](#output\_name) | The name of the QuickSight group. |
 | <a name="output_namespace"></a> [namespace](#output\_namespace) | The namespace that the group belongs to. |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->

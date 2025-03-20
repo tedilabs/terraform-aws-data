@@ -8,7 +8,7 @@ This module creates following resources.
 - `aws_iam_role_policy_attachment` (optional)
 - `aws_iam_instance_profile` (optional)
 
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -88,4 +88,4 @@ This module creates following resources.
 | <a name="output_schedule"></a> [schedule](#output\_schedule) | The cron expression used to specify the schedule. |
 | <a name="output_security_configuration"></a> [security\_configuration](#output\_security\_configuration) | The name of Security Configuration of the crawler. |
 | <a name="output_table_prefix"></a> [table\_prefix](#output\_table\_prefix) | The table prefix used for catalog tables that are created. |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->

@@ -5,7 +5,7 @@ This module creates following resources.
 - `aws_athena_workgroup`
 - `aws_athena_named_query` (optional)
 
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -69,4 +69,4 @@ This module creates following resources.
 | <a name="output_per_query_data_usage_limit"></a> [per\_query\_data\_usage\_limit](#output\_per\_query\_data\_usage\_limit) | The limit in bytes for the maximum amount of data a query is allowed to scan |
 | <a name="output_query_on_s3_requester_pays_bucket_enabled"></a> [query\_on\_s3\_requester\_pays\_bucket\_enabled](#output\_query\_on\_s3\_requester\_pays\_bucket\_enabled) | Whether members assigned to a workgroup to reference Amazon S3 Requester Pays buckets in queries are allowed. |
 | <a name="output_query_result"></a> [query\_result](#output\_query\_result) | The configuration for query result location and encryption. |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->

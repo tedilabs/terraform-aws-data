@@ -5,7 +5,7 @@ This module creates following resources.
 - `aws_quicksight_folder`
 - `aws_quicksight_folder_membership` (optional)
 
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -64,4 +64,4 @@ This module creates following resources.
 | <a name="output_permissions"></a> [permissions](#output\_permissions) | A list of resource permissions on the QuickSight folder. |
 | <a name="output_type"></a> [type](#output\_type) | The type of the QuickSight folder. |
 | <a name="output_updated_at"></a> [updated\_at](#output\_updated\_at) | The time that the QuickSight folder was last updated. |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->

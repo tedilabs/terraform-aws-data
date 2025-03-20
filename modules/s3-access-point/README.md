@@ -5,7 +5,7 @@ This module creates following resources.
 - `aws_s3_access_point`
 - `aws_s3control_access_point_policy` (optional)
 
-<!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- BEGIN_TF_DOCS -->
 ## Requirements
 
 | Name | Version |
@@ -55,4 +55,4 @@ No modules.
 | <a name="output_name"></a> [name](#output\_name) | The name of the S3 Access Point. |
 | <a name="output_network_origin"></a> [network\_origin](#output\_network\_origin) | Indicates whether this access point allows access from the public Internet. Values are `VPC` (the access point doesn't allow access from the public Internet) and `INTERNET` (the access point allows access from the public Internet, subject to the access point and bucket access policies). |
 | <a name="output_vpc_id"></a> [vpc\_id](#output\_vpc\_id) | The VPC ID is to be only allowed connections to this access point if `network_origin` is `VPC`. |
-<!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
+<!-- END_TF_DOCS -->
