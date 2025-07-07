@@ -34,21 +34,6 @@
   - any-glob-to-any-file:
     - modules/glue-table/**/*
 
-":floppy_disk: quicksight-folder":
-- changed-files:
-  - any-glob-to-any-file:
-    - modules/quicksight-folder/**/*
-
-":floppy_disk: quicksight-group":
-- changed-files:
-  - any-glob-to-any-file:
-    - modules/quicksight-group/**/*
-
-":floppy_disk: quicksight-namespace":
-- changed-files:
-  - any-glob-to-any-file:
-    - modules/quicksight-namespace/**/*
-
 ":floppy_disk: s3-access-point":
 - changed-files:
   - any-glob-to-any-file:

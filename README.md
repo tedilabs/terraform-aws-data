@@ -13,9 +13,6 @@ Terraform module which creates data related resources on AWS.
 - [glue-data-catalog](./modules/glue-data-catalog)
 - [glue-database](./modules/glue-database)
 - [glue-table](./modules/glue-table)
-- [quicksight-folder](./modules/quicksight-folder)
-- [quicksight-group](./modules/quicksight-group)
-- [quicksight-namespace](./modules/quicksight-namespace)
 - [s3-access-point](./modules/s3-access-point)
 - [s3-bucket](./modules/s3-bucket)
 
@@ -34,10 +31,6 @@ Terraform Modules from [this package](https://github.com/tedilabs/terraform-aws-
     - Data Catalog
     - Database
     - Table
-- **AWS QuickSight**
-  - Folder
-  - Group & Group Membership
-  - Namespace
 - **AWS S3**
   - S3 Bucket
   - S3 Access Point
@@ -53,11 +46,6 @@ Terraform Modules from [this package](https://github.com/tedilabs/terraform-aws-
 
 - [Glue Data Catalog (Simple)](./examples/glue-data-catalog-simple)
 - [Glue Data Catalog (Full)](./examples/glue-data-catalog-full)
-
-### QuickSight
-
-- [QuickSight User and Group](./examples/quicksight-user-and-group)
-- [QuickSight Assets](./examples/quicksight-assets)
 
 ### S3 Bucket
 
