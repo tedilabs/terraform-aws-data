@@ -167,3 +167,19 @@ output "lake_formation_credentials_configuration" {
     account_id = one(aws_glue_crawler.this.lake_formation_configuration[*].account_id)
   }
 }
+
+output "resource_group" {
+  description = "The resource group created to manage resources in this module."
+  value = merge(
+    {
+      enabled = var.resource_group.enabled && var.module_tags_enabled
+    },
+    (var.resource_group.enabled && var.module_tags_enabled
+      ? {
+        arn  = module.resource_group[0].arn
+        name = module.resource_group[0].name
+      }
+      : {}
+    )
+  )
+}
