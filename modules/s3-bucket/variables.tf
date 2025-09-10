@@ -1,6 +1,14 @@
+variable "region" {
+  description = "(Optional) The region in which to create the module resources. If not provided, the module resources will be created in the provider's configured region."
+  type        = string
+  default     = null
+  nullable    = true
+}
+
 variable "name" {
   description = "(Required) Desired name for the S3 bucket."
   type        = string
+  nullable    = false
 }
 
 variable "force_destroy" {
@@ -14,7 +22,7 @@ variable "encryption" {
   description = <<EOF
   (Optional) A configurations of Server-Side Encryption for the S3 bucket.
     (Optional) `type` - The server-side encryption algorithm to use. Valid values are `AES256` and `AWS_KMS`. Defaults to `AES256`.
-    (Optional) `kms_key` - The AWS KMS key ID used for the `SSE-KMS` encryption. This can only be used when you set the value of `encryption.type` as `AWS_KMS`. The default `aws/s3` AWS KMS key is used if this element is absent while the `encryption.type` is `AWS_KMS`.
+    (Optional) `kms_key` - The AWS KMS key ID used for the `SSE-KMS` encryption. This can only be used when you set the value of `encryption.type` as `AWS_KMS` or `AWS_KMS_DSSE`. The default `aws/s3` AWS KMS key is used if this element is absent while the `encryption.type` is `AWS_KMS` or `AWS_KMS_DSSE`.
     (Optional) `bucket_key_enabled` - Whether or not to use Amazon S3 Bucket Keys for SSE-KMS. Defaults to `true`.
   EOF
   type = object({
@@ -26,8 +34,8 @@ variable "encryption" {
   nullable = false
 
   validation {
-    condition     = contains(["AES256", "AWS_KMS"], var.encryption.type)
-    error_message = "Valid values for `encryption.type` are `AES256`, `AWS_KMS`."
+    condition     = contains(["AES256", "AWS_KMS", "AWS_KMS_DSSE"], var.encryption.type)
+    error_message = "Valid values for `encryption.type` are `AES256`, `AWS_KMS`, `AWS_KMS_DSSE`."
   }
 }
 
@@ -64,7 +72,6 @@ variable "object_lock" {
   description = <<EOF
   (Optional) A configurations of Object Lock for the S3 bucket.
     (Optional) `enabled` - Whether to use an accelerated endpoint for faster data transfers. Defaults to `false`.
-    (Optional) `token` - A token to allow Object Lock to be enabled for an existing bucket. You must contact AWS support for the bucket's 'Object Lock token'. The token is generated in the back-end when versioning is enabled on a bucket.
     (Optional) `default_retention` - Specify the default Object Lock retention settings for new objects placed in the bucket. `default_retention` block as defined below.
       (Required) `mode` - The default Object Lock retention mode you want to apply to new objects placed in the specified bucket. Valid values are `COMPLIANCE`, `GOVERNANCE`. Defaults to `GOVERNANCE`.
       (Optional) `unit` - The default Object Lock retention unit. Valid values are `DAYS`, `YEARS`. Defaults to `DAYS`.
@@ -72,7 +79,6 @@ variable "object_lock" {
   EOF
   type = object({
     enabled = optional(bool, false)
-    token   = optional(string, "")
     default_retention = optional(object({
       mode  = optional(string, "GOVERNANCE")
       unit  = optional(string, "DAYS")
@@ -90,6 +96,18 @@ variable "object_lock" {
       ])
     )
     error_message = "Valid values for `object_lock.default_retention.mode` are `COMPLIANCE` and `GOVERNANCE`. Valid values for `object_lock.default_retention.unit are `DAYS` and `YEARS`."
+  }
+}
+
+variable "lifecycle_transition_default_min_object_size_strategy" {
+  description = "(Optional) The default minimum object size (in bytes) to which the lifecycle transition rule applies. This is used when a lifecycle rule does not specify `min_object_size`. Valid values are `all_storage_classes_128K` and `varies_by_storage_class`. Custom filters always take precedence over the default transition behavior. Defaults to `all_storage_classes_128K`."
+  type        = string
+  default     = "all_storage_classes_128K"
+  nullable    = false
+
+  validation {
+    condition     = contains(["all_storage_classes_128K", "varies_by_storage_class"], var.lifecycle_transition_default_min_object_size_strategy)
+    error_message = "Valid values for `lifecycle_transition_default_min_object_size_strategy` are `all_storage_classes_128K` and `varies_by_storage_class`."
   }
 }
 
@@ -112,8 +130,8 @@ variable "lifecycle_rules" {
     id      = string
     enabled = optional(bool, true)
 
-    prefix          = optional(string)
-    tags            = optional(map(string))
+    prefix          = optional(string, "")
+    tags            = optional(map(string), {})
     min_object_size = optional(number)
     max_object_size = optional(number)
 
@@ -266,7 +284,10 @@ variable "logging" {
     (Optional) `enabled` - Whether to enable S3 bucket logging for the access log. Defaults to `false`.
     (Optional) `s3_bucket` - The name of the bucket to deliver logs to.
     (Optional) `s3_key_prefix` - The key prefix to append to log objects.
-
+    (Optional) `s3_key_format` - The key format to use for log object keys. Valid values are `SIMPLE`, `PARTITIONED_BY_DELIVERY_TIME` and `PARTITIONED_BY_EVENT_TIME`. Defaults to `SIMPLE`.
+      `SIMPLE` - The key is in the format `[s3_key_prefix][YYYY]-[MM]-[DD]-[hh]-[mm]-[ss]-[UniqueString]`.
+      `PARTITIONED_BY_DELIVERY_TIME` - The key is in the format `[s3_key_prefix][SourceAccountId]/[SourceRegion]/[SourceBucket]/[YYYY]/[MM]/[DD]/[YYYY]-[MM]-[DD]-[hh]-[mm]-[ss]-[UniqueString]`. The time in the log file names corresponds to the delivery time for the log files.
+      `PARTITIONED_BY_EVENT_TIME` - The key is in the format `[s3_key_prefix][SourceAccountId]/[SourceRegion]/[SourceBucket]/[YYYY]/[MM]/[DD]/[YYYY]-[MM]-[DD]-[hh]-[mm]-[ss]-[UniqueString]`. The year, month, and day correspond to the day on which the event occurred, and the hour, minutes and seconds are set to 00 in the key.
     (Optional) `is_target_bucket` - Whether this bucket is the target bucket for Server Access Logging.
     (Optional) `allowed_source_buckets` - A list of names of S3 buckets allowed to write logs to this target bucket. Each source bucket should be owned by same AWS account ID with target bucket. Only used if `is_target_bucket` is `true`.
   EOF
@@ -274,12 +295,18 @@ variable "logging" {
     enabled       = optional(bool, false)
     s3_bucket     = optional(string)
     s3_key_prefix = optional(string)
+    s3_key_format = optional(string, "SIMPLE")
 
     is_target_bucket       = optional(bool, false)
     allowed_source_buckets = optional(list(string), [])
   })
   default  = {}
   nullable = false
+
+  validation {
+    condition     = contains(["SIMPLE", "PARTITIONED_BY_DELIVERY_TIME", "PARTITIONED_BY_EVENT_TIME"], var.logging.s3_key_format)
+    error_message = "Valid values for `logging.s3_key_format` are `SIMPLE`, `PARTITIONED_BY_DELIVERY_TIME` and `PARTITIONED_BY_EVENT_TIME`."
+  }
 }
 
 variable "request_metrics" {
@@ -287,14 +314,16 @@ variable "request_metrics" {
   (Optional) A list of CORS (Cross-Origin Resource Sharing) rules for the bucket. You can configure up to 100 rules. Each value of `cors_rules` as defined below.
     (Required) `name` - Unique identifier of the metrics configuration for the bucket. Must be less than or equal to 64 characters in length.
     (Optional) `filter` - Object filtering that accepts a prefix, tags, or a logical AND of prefix and tags. `filter` block as defined below.
-      (Optional) `prefix` - Limit this filter to a single prefix.
-      (Optional) `tags` - Limit this filter to the key/value pairs. Up to 10 key/value pairs.
+      (Optional) `access_point` - The access point ARN used when evaluating a metrics filter.
+      (Optional) `prefix` - The prefix used when evaluating a metrics filter.
+      (Optional) `tags` - The tag used when evaluating a metrics filter. Up to 10 key/value pairs.
   EOF
   type = list(object({
     name = string
     filter = optional(object({
-      prefix = optional(string)
-      tags   = optional(map(string), {})
+      access_point = optional(string)
+      prefix       = optional(string)
+      tags         = optional(map(string), {})
     }))
   }))
   default  = []
@@ -315,6 +344,18 @@ variable "transfer_acceleration_enabled" {
   nullable    = false
 }
 
+variable "timeouts" {
+  description = "(Optional) How long to wait for the S3 bucket to be created/read/updated/deleted."
+  type = object({
+    create = optional(string, "20m")
+    read   = optional(string, "20m")
+    update = optional(string, "20m")
+    delete = optional(string, "65m")
+  })
+  default  = {}
+  nullable = false
+}
+
 variable "tags" {
   description = "(Optional) A map of tags to add to all resources."
   type        = map(string)
@@ -333,9 +374,6 @@ variable "module_tags_enabled" {
 ###################################################
 # Resource Group
 ###################################################
-
-
-
 
 variable "resource_group" {
   description = <<EOF

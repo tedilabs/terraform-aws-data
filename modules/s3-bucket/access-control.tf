@@ -29,6 +29,8 @@ data "aws_iam_policy_document" "this" {
 }
 
 resource "aws_s3_bucket_policy" "this" {
+  region = var.region
+
   bucket = aws_s3_bucket.this.id
   policy = data.aws_iam_policy_document.this.json
 }
@@ -39,6 +41,8 @@ resource "aws_s3_bucket_policy" "this" {
 ###################################################
 
 resource "aws_s3_bucket_ownership_controls" "this" {
+  region = var.region
+
   bucket = aws_s3_bucket.this.bucket
 
   rule {
@@ -57,6 +61,8 @@ resource "aws_s3_bucket_ownership_controls" "this" {
 # - `access_control_policy.owner.display_name`
 resource "aws_s3_bucket_acl" "this" {
   count = var.object_ownership != "BucketOwnerEnforced" ? 1 : 0
+
+  region = var.region
 
   bucket = aws_s3_bucket.this.bucket
 
@@ -87,6 +93,8 @@ resource "aws_s3_bucket_acl" "this" {
 ###################################################
 
 resource "aws_s3_bucket_public_access_block" "this" {
+  region = var.region
+
   bucket = aws_s3_bucket.this.bucket
 
   # Block new public ACLs and uploading public objects
@@ -101,6 +109,8 @@ resource "aws_s3_bucket_public_access_block" "this" {
   # Retroactivley block public and cross-account access if bucket has public policies
   restrict_public_buckets = (var.block_public_access.enabled
   || var.block_public_access.restrict_public_buckets_enabled)
+
+  skip_destroy = true
 
   # To avoid OperationAborted: A conflicting conditional operation is currently in progress
   depends_on = [
@@ -117,6 +127,8 @@ resource "aws_s3_bucket_public_access_block" "this" {
 # - `expected_bucket_owner`
 resource "aws_s3_bucket_cors_configuration" "this" {
   count = length(var.cors_rules) > 0 ? 1 : 0
+
+  region = var.region
 
   bucket = aws_s3_bucket.this.bucket
 

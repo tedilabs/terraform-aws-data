@@ -19,6 +19,8 @@ locals {
 # INFO: Not supported attributes
 # - `expected_bucket_owner`
 resource "aws_s3_bucket_versioning" "this" {
+  region = var.region
+
   bucket = aws_s3_bucket.this.bucket
 
   mfa = (var.versioning.status == "ENABLED"
@@ -42,11 +44,14 @@ resource "aws_s3_bucket_versioning" "this" {
 
 # INFO: Not supported attributes
 # - `expected_bucket_owner`
+# INFO: Deprecated attributes
+# - `token`
 resource "aws_s3_bucket_object_lock_configuration" "this" {
   count = var.object_lock.enabled ? 1 : 0
 
+  region = var.region
+
   bucket              = aws_s3_bucket_versioning.this.bucket
-  token               = var.object_lock.token
   object_lock_enabled = "Enabled"
 
   dynamic "rule" {
@@ -60,6 +65,12 @@ resource "aws_s3_bucket_object_lock_configuration" "this" {
       }
     }
   }
+
+  lifecycle {
+    ignore_changes = [
+      token,
+    ]
+  }
 }
 
 
@@ -72,7 +83,11 @@ resource "aws_s3_bucket_object_lock_configuration" "this" {
 resource "aws_s3_bucket_lifecycle_configuration" "this" {
   count = length(var.lifecycle_rules) > 0 ? 1 : 0
 
+  region = var.region
+
   bucket = aws_s3_bucket_versioning.this.bucket
+
+  transition_default_minimum_object_size = var.lifecycle_transition_default_min_object_size_strategy
 
   dynamic "rule" {
     for_each = var.lifecycle_rules
@@ -89,10 +104,24 @@ resource "aws_s3_bucket_lifecycle_configuration" "this" {
         }
       }
 
-      ## Single Filter
+      ## Empty Filter
       dynamic "filter" {
         for_each = sum([
-          rule.value.prefix != null ? 1 : 0,
+          rule.value.prefix != "" ? 1 : 0,
+          length(rule.value.tags) != 0 ? 1 : 0,
+          rule.value.min_object_size != null ? 1 : 0,
+          rule.value.max_object_size != null ? 1 : 0,
+        ]) == 0 ? ["go"] : []
+
+        content {
+          prefix = rule.value.prefix
+        }
+      }
+
+      ## Single Filter
+      dynamic "filter" {
+        for_each = length(rule.value.tags) == 0 && sum([
+          rule.value.prefix != "" ? 1 : 0,
           rule.value.min_object_size != null ? 1 : 0,
           rule.value.max_object_size != null ? 1 : 0,
         ]) == 1 ? ["go"] : []
@@ -108,8 +137,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "this" {
       ## Multi Filter
       dynamic "filter" {
         for_each = sum([
-          rule.value.prefix != null ? 1 : 0,
-          rule.value.tags != null ? 2 : 0,
+          rule.value.prefix != "" ? 1 : 0,
+          length(rule.value.tags) != 0 ? 2 : 0,
           rule.value.min_object_size != null ? 1 : 0,
           rule.value.max_object_size != null ? 1 : 0,
         ]) > 1 ? ["go"] : []
@@ -117,7 +146,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "this" {
         content {
           and {
             prefix = rule.value.prefix
-            tags   = rule.value.tags
+            tags   = rule.value.tags != {} ? rule.value.tags : null
 
             object_size_greater_than = rule.value.min_object_size
             object_size_less_than    = rule.value.max_object_size
@@ -154,7 +183,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "this" {
           date = expiration.value.date
           days = expiration.value.days
 
-          expired_object_delete_marker = expiration.value.expired_object_delete_marker
+          expired_object_delete_marker = expiration.value.expired_object_delete_marker ? true : null
         }
       }
 

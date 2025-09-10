@@ -1,3 +1,8 @@
+output "region" {
+  description = "The AWS region this module resources resides in."
+  value       = aws_s3_bucket.this.region
+}
+
 output "name" {
   description = "The name of the bucket."
   value       = aws_s3_bucket.this.bucket
@@ -11,11 +16,6 @@ output "id" {
 output "arn" {
   description = "The ARN of the bucket."
   value       = aws_s3_bucket.this.arn
-}
-
-output "region" {
-  description = "The AWS region this bucket resides in."
-  value       = aws_s3_bucket.this.region
 }
 
 output "hosted_zone_id" {
@@ -51,19 +51,22 @@ output "versioning" {
   }
 }
 
-output "lifecycle_rules" {
+output "lifecycle" {
   description = "The lifecycle configuration for the bucket."
   value = {
-    for rule in try(aws_s3_bucket_lifecycle_configuration.this[0].rule, []) :
-    rule.id => {
-      id      = rule.id
-      enabled = rule.status == "Enabled"
+    transition_default_min_object_size_strategy = var.lifecycle_transition_default_min_object_size_strategy
+    rules = {
+      for rule in try(aws_s3_bucket_lifecycle_configuration.this[0].rule, []) :
+      rule.id => {
+        id      = rule.id
+        enabled = rule.status == "Enabled"
 
-      filter = {
-        prefix          = try(local.lifecycle_rules[rule.id].prefix, null)
-        tags            = try(local.lifecycle_rules[rule.id].tags, {})
-        min_object_size = try(local.lifecycle_rules[rule.id].min_object_size, null)
-        max_object_size = try(local.lifecycle_rules[rule.id].max_object_size, null)
+        filter = {
+          prefix          = try(local.lifecycle_rules[rule.id].prefix, null)
+          tags            = try(local.lifecycle_rules[rule.id].tags, {})
+          min_object_size = try(local.lifecycle_rules[rule.id].min_object_size, null)
+          max_object_size = try(local.lifecycle_rules[rule.id].max_object_size, null)
+        }
       }
     }
   }
@@ -111,6 +114,7 @@ output "logging" {
     enabled       = var.logging.enabled
     s3_bucket     = one(aws_s3_bucket_logging.this[*].target_bucket)
     s3_key_prefix = one(aws_s3_bucket_logging.this[*].target_prefix)
+    s3_key_format = var.logging.s3_key_format
 
     is_target_bucket       = var.logging.is_target_bucket
     allowed_source_buckets = var.logging.allowed_source_buckets

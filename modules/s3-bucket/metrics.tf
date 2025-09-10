@@ -9,6 +9,8 @@ resource "aws_s3_bucket_metric" "this" {
     metric.name => metric
   }
 
+  region = var.region
+
   bucket = aws_s3_bucket.this.bucket
   name   = each.key
 
@@ -16,8 +18,9 @@ resource "aws_s3_bucket_metric" "this" {
     for_each = each.value.filter != null ? [each.value.filter] : []
 
     content {
-      prefix = filter.value.prefix
-      tags   = filter.value.tags
+      access_point = filter.value.access_point
+      prefix       = filter.value.prefix
+      tags         = filter.value.tags
     }
   }
 }
