@@ -198,3 +198,157 @@ resource "aws_s3_bucket_lifecycle_configuration" "this" {
     }
   }
 }
+
+
+###################################################
+# Replication Rules for S3 Bucket
+###################################################
+
+# INFO: Not supported attributes
+# - `prefix`
+# - `token`
+# - `rule.existing_object_replication`: Not supported by Amazon S3 at this time and should not be included in your rule configurations. Specifying this parameter will result in MalformedXML errors
+resource "aws_s3_bucket_replication_configuration" "this" {
+  count = length(var.replication_rules) > 0 ? 1 : 0
+
+  region = var.region
+
+  role   = local.replication_iam_role
+  bucket = aws_s3_bucket_versioning.this.bucket
+
+  dynamic "rule" {
+    for_each = var.replication_rules
+
+    content {
+      id       = rule.value.id
+      priority = rule.value.priority
+      status   = rule.value.enabled ? "Enabled" : "Disabled"
+
+      delete_marker_replication {
+        status = rule.value.delete_marker_replication_enabled ? "Enabled" : "Disabled"
+      }
+
+      source_selection_criteria {
+        dynamic "sse_kms_encrypted_objects" {
+          for_each = rule.value.sse_kms_encrypted_objects_replication.enabled ? ["go"] : []
+
+          content {
+            status = "Enabled"
+          }
+        }
+
+        replica_modifications {
+          status = rule.value.replica_modification_sync_enabled ? "Enabled" : "Disabled"
+        }
+      }
+
+      # INFO: Not supported yet.
+      # dynamic "existing_object_replication" {
+      #   for_each = rule.value.existing_object_replication_enabled ? ["go"] : []
+      #
+      #   content {
+      #     status = "Enabled"
+      #   }
+      # }
+
+      ## Empty Filter
+      dynamic "filter" {
+        for_each = sum([
+          rule.value.prefix != "" ? 1 : 0,
+          length(rule.value.tags) != 0 ? 1 : 0,
+        ]) == 0 ? ["go"] : []
+
+        content {}
+      }
+
+      ## Single Filter (Prefix)
+      dynamic "filter" {
+        for_each = anytrue([
+          length(rule.value.tags) == 0 && rule.value.prefix != "",
+        ]) ? ["go"] : []
+
+        content {
+          prefix = rule.value.prefix
+        }
+      }
+
+      ## Single Filter (Tag)
+      dynamic "filter" {
+        for_each = anytrue([
+          length(rule.value.tags) == 1 && rule.value.prefix == "",
+        ]) ? ["go"] : []
+
+        content {
+          dynamic "tag" {
+            for_each = rule.value.tags
+
+            content {
+              key   = tag.key
+              value = tag.value == null ? "" : tag.value
+            }
+          }
+        }
+      }
+
+      ## Multi Filter
+      dynamic "filter" {
+        for_each = anytrue([
+          length(rule.value.tags) >= 2,
+          length(rule.value.tags) != 0 && rule.value.prefix != "",
+        ]) ? ["go"] : []
+
+        content {
+          and {
+            prefix = rule.value.prefix
+            tags   = rule.value.tags
+          }
+        }
+      }
+
+      destination {
+        bucket        = provider::aws::arn_build("aws", "s3", "", "", rule.value.destination.bucket)
+        account       = coalesce(rule.value.destination.account, local.account_id)
+        storage_class = rule.value.destination.storage_class
+
+        dynamic "access_control_translation" {
+          for_each = rule.value.ownership_translation_enabled ? ["go"] : []
+
+          content {
+            owner = "Destination"
+          }
+        }
+
+        dynamic "encryption_configuration" {
+          for_each = rule.value.sse_kms_encrypted_objects_replication.enabled ? ["go"] : []
+
+          content {
+            replica_kms_key_id = rule.value.sse_kms_encrypted_objects_replication.kms_key
+          }
+        }
+
+        replication_time {
+          status = rule.value.replication_time_control.enabled ? "Enabled" : "Disabled"
+
+          time {
+            minutes = rule.value.replication_time_control.time_threshold
+          }
+        }
+
+        metrics {
+          status = rule.value.metrics.enabled ? "Enabled" : "Disabled"
+
+          event_threshold {
+            minutes = rule.value.metrics.time_threshold
+          }
+        }
+      }
+    }
+  }
+
+  lifecycle {
+    precondition {
+      condition     = aws_s3_bucket_versioning.this.versioning_configuration[0].status == "Enabled"
+      error_message = "Replication rules require versioning to be enabled on the source bucket."
+    }
+  }
+}

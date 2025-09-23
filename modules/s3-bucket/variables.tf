@@ -165,6 +165,122 @@ variable "lifecycle_rules" {
   nullable = false
 }
 
+variable "replication_iam_role" {
+  description = <<EOF
+  (Optional) The ARN (Amazon Resource Name) of the IAM Role that Amazon S3 assumes when replicating objects. Only required if `default_replication_iam_role.enabled` is `false`.
+  EOF
+  type        = string
+  default     = null
+  nullable    = true
+}
+
+variable "default_replication_iam_role" {
+  description = <<EOF
+  (Optional) A configuration for the default IAM role for the S3 bucket replication. Use `replication_iam_role` if `default_replication_iam_role.enabled` is `false`. `default_replication_iam_role` as defined below.
+    (Optional) `enabled` - Whether to create the default replication IAM role. Defaults to `true`.
+    (Optional) `name` - The name of the default replication IAM role. Defaults to `s3-$${var.name}-replication`.
+    (Optional) `path` - The path of the default replication IAM role. Defaults to `/`.
+    (Optional) `description` - The description of the default replication IAM role.
+    (Optional) `policies` - A list of IAM policy ARNs to attach to the default replication IAM role. Defaults to `[]`.
+    (Optional) `inline_policies` - A Map of inline IAM policies to attach to the default replication IAM role. (`name` => `policy`).
+  EOF
+  type = object({
+    enabled     = optional(bool, true)
+    name        = optional(string)
+    path        = optional(string, "/")
+    description = optional(string, "Managed by Terraform.")
+
+    policies        = optional(list(string), [])
+    inline_policies = optional(map(string), {})
+  })
+  default  = {}
+  nullable = false
+}
+
+variable "replication_rules" {
+  description = <<EOF
+  (Optional) A configurations of Replication Rules for the S3 bucket. Use replication rules to define actions for automatic replication of objects across different AWS Regions or within the same Region. Each value of `replication_rules` as defined below.
+    (Required) `id` - Unique identifier for the rule. Must be less than or equal to 255 characters in length.
+    (Optional) `priority` - The priority associated with the rule. Priority must be unique across all replication rules. Defaults to `0`.
+    (Optional) `enabled` - Whether the rule is activated. Defaults to `true`.
+    (Optional) `prefix` - The prefix identifying one or more objects to which the rule applies. Defaults to an empty string (`""`) if not specified.
+    (Optional) `tags` - A map of tag keys and values to filter objects for replication.
+    (Required) `destination` - A configuration of replication destination. `destination` block as defined below.
+      (Required) `bucket` - The destination S3 bucket name.
+      (Optional) `account` - The account ID of the destination bucket owner. Defaults to current account.
+      (Optional) `storage_class` - The storage class to use when replicating objects. By default, Amazon S3 uses the storage class of the source object to create the object replica.
+    (Optional) `ownership_translation_enabled` - Whether to enable ownership translation. Ownership translation is required when you are replicating objects to a destination bucket owned by a different AWS account. Defaults to `false`.
+    (Optional) `replication_time` - A configuration for S3 Replication Time Control (S3 RTC). `replication_time` block as defined below.
+      (Required) `enabled` - Whether S3 Replication Time Control is enabled.
+      (Optional) `minutes` - The time in minutes by which replication should be completed. Valid value is `15`.
+    (Optional) `metrics` - A configuration for replication metrics. With replication metrics, you can monitor the total number and size of objects that are pending replication, and the maximum replication time to the destination Region. You can also view and diagnose replication failures. CloudWatch metrics fees apply. `metrics` block as defined below.
+      (Required) `enabled` - Whether replication metrics are enabled. Defaults to `false`.
+      (Optional) `time_threshold` - The time threshold in minutes for emitting the `s3:Replication:OperationMissedThreshold` event. Valid value is `15`.
+    (Optional) `delete_marker_replication_enabled` - Whether to replicate delete markers. Delete markers created by S3 delete operations will be replicated. Delete markers created by lifecycle rules are not replicated. Defaults to `false`.
+    (Optional) `replica_modification_sync_enabled` - Whether to enable replica modification sync. S3 replica modification sync can help you keep object metadata such as tags, access control lists (ACLs), and Object Lock settings replicated between replicas and source objects. By default, Amazon S3 replicates metadata from the source objects to the replicas only. When replica modification sync is enabled, Amazon S3 replicates metadata changes made to the replica copies back to the source object, making the replication bidirectional. Defaults to `false`.
+    (Optional) `sse_kms_encrypted_objects_replication` - A configuration to replicate objects encrypted with AWS KMS. `sse_kms_encrypted_objects_replication` block as defined below.
+      (Optional) `enabled` - Whether to replicate objects encrypted with AWS KMS. Defaults to `false`.
+      (Optional) `kms_key` - The AWS KMS key ID (Key ARN or Alias ARN) used to encrypt the replica object for the destination bucket.
+  EOF
+  type = list(object({
+    id       = string
+    priority = optional(number, 0)
+    enabled  = optional(bool, true)
+
+    prefix = optional(string, "")
+    tags   = optional(map(string), {})
+
+    destination = object({
+      bucket  = string
+      account = optional(string)
+
+      storage_class = optional(string)
+    })
+
+    ownership_translation_enabled     = optional(bool, false)
+    delete_marker_replication_enabled = optional(bool, false)
+    replica_modification_sync_enabled = optional(bool, false)
+    replication_time_control = optional(object({
+      enabled        = optional(bool, false)
+      time_threshold = optional(number, 15)
+    }), {})
+    metrics = optional(object({
+      enabled        = optional(bool, false)
+      time_threshold = optional(number, 15)
+    }), {})
+    sse_kms_encrypted_objects_replication = optional(object({
+      enabled = optional(bool, false)
+      kms_key = optional(string)
+    }), {})
+  }))
+  default  = []
+  nullable = false
+
+  validation {
+    condition = alltrue([
+      for rule in var.replication_rules :
+      length(rule.id) <= 255
+    ])
+    error_message = "The replication rule ID must be less than or equal to 255 characters in length."
+  }
+  validation {
+    condition = alltrue([
+      for rule in var.replication_rules :
+      rule.metrics.enabled
+      if rule.replication_time_control.enabled
+    ])
+    error_message = "`metrics.enabled` must be `true` if `replication_time_control.enabled` is `true`."
+  }
+  validation {
+    condition = alltrue([
+      for rule in var.replication_rules :
+      !rule.delete_marker_replication_enabled
+      if length(rule.tags) > 0
+    ])
+    error_message = "`delete_marker_replication_enabled` must be `false` if `tags` are set."
+  }
+}
+
 variable "policy" {
   description = "(Optional) A valid policy JSON document. Although this is a bucket policy, not an IAM policy, the `aws_iam_policy_document` data source may be used, so long as it specifies a principal. Bucket policies are limited to 20 KB in size."
   type        = string

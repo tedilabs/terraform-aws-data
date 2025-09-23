@@ -1,3 +1,42 @@
+locals {
+  replication_rules_by_id = {
+    for rule in var.replication_rules :
+    rule.id => rule
+  }
+  replication_rules = [
+    for rule in try(aws_s3_bucket_replication_configuration.this[0].rule, []) : {
+      id       = rule.id
+      priority = rule.priority
+      enabled  = rule.status == "Enabled"
+
+      prefix = local.replication_rules_by_id[rule.id].prefix
+      tags   = local.replication_rules_by_id[rule.id].tags
+
+      destination = {
+        account = rule.destination[0].account
+        bucket = {
+          arn  = rule.destination[0].bucket
+          name = local.replication_rules_by_id[rule.id].destination.bucket
+        }
+        storage_class = local.replication_rules_by_id[rule.id].destination.storage_class
+      }
+
+      ownership_translation_enabled     = local.replication_rules_by_id[rule.id].ownership_translation_enabled
+      delete_marker_replication_enabled = local.replication_rules_by_id[rule.id].delete_marker_replication_enabled
+      replica_modification_sync_enabled = rule.source_selection_criteria[0].replica_modifications[0].status == "Enabled"
+      replication_time_control = {
+        enabled        = rule.destination[0].replication_time[0].status == "Enabled"
+        time_threshold = rule.destination[0].replication_time[0].time[0].minutes
+      }
+      metrics = {
+        enabled        = rule.destination[0].metrics[0].status == "Enabled"
+        time_threshold = rule.destination[0].metrics[0].event_threshold[0].minutes
+      }
+      sse_kms_encrypted_objects_replication = local.replication_rules_by_id[rule.id].sse_kms_encrypted_objects_replication
+    }
+  ]
+}
+
 output "region" {
   description = "The AWS region this module resources resides in."
   value       = aws_s3_bucket.this.region
@@ -69,6 +108,15 @@ output "lifecycle" {
         }
       }
     }
+  }
+}
+
+output "replication" {
+  description = "The replication configuration for the bucket."
+  value = {
+    enabled  = length(var.replication_rules) > 0
+    iam_role = local.replication_iam_role
+    rules    = local.replication_rules
   }
 }
 

@@ -19,7 +19,6 @@ locals {
 # S3 Bucket
 ###################################################
 
-# TODO: replication_configuration
 # TODO: website
 # TODO: aws_s3_bucket_analytics_configuration
 # TODO: aws_s3_bucket_intelligent_tiering_configuration
