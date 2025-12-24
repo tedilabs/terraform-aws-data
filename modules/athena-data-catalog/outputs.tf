@@ -1,3 +1,8 @@
+output "region" {
+  description = "The AWS region this module resources resides in."
+  value       = aws_athena_data_catalog.this.region
+}
+
 output "arn" {
   description = "The Amazon Resource Name (ARN) of the data catalog."
   value       = aws_athena_data_catalog.this.arn
