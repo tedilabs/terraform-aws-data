@@ -36,6 +36,10 @@ locals {
 }
 
 
+###################################################
+# Athena Workgroup
+###################################################
+
 resource "aws_athena_workgroup" "this" {
   region = var.region
 
@@ -63,7 +67,10 @@ resource "aws_athena_workgroup" "this" {
         enabled = config.value.management_mode == "ATHENA_MANAGED"
 
         dynamic "encryption_configuration" {
-          for_each = config.value.management_mode == "ATHENA_MANAGED" ? [config.value.athena_managed_query_result.encryption] : []
+          for_each = (config.value.management_mode == "ATHENA_MANAGED" && config.value.athena_managed_query_result.encryption.kms_key != null
+            ? [config.value.athena_managed_query_result.encryption]
+            : []
+          )
           iterator = encryption
 
           content {
@@ -112,7 +119,7 @@ resource "aws_athena_workgroup" "this" {
       )
     )
     dynamic "identity_center_configuration" {
-      for_each = (local.engine_type == "ATHENA_SQL"
+      for_each = (local.engine_type == "ATHENA_SQL" && var.iam_identity_center.enabled
         ? [var.iam_identity_center]
         : []
       )
@@ -149,25 +156,4 @@ resource "aws_athena_workgroup" "this" {
     local.module_tags,
     var.tags,
   )
-}
-
-
-###################################################
-# Named Queries
-###################################################
-
-resource "aws_athena_named_query" "this" {
-  for_each = {
-    for query in var.named_queries :
-    "${query.database}:${query.name}" => query
-  }
-
-  region = var.region
-
-  workgroup   = aws_athena_workgroup.this.id
-  name        = each.value.name
-  description = try(each.value.description, "Managed by Terraform.")
-
-  database = each.value.database
-  query    = each.value.query
 }

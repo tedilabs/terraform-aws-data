@@ -51,7 +51,7 @@ output "query_result" {
       athena_managed_query_result = (aws_athena_workgroup.this.configuration[0].managed_query_results_configuration[0].enabled
         ? {
           encryption = {
-            kms_key = aws_athena_workgroup.this.configuration[0].managed_query_results_configuration[0].encryption_configuration[0].kms_key
+            kms_key = one(aws_athena_workgroup.this.configuration[0].managed_query_results_configuration[0].encryption_configuration[*].kms_key)
           }
         }
         : null
@@ -82,9 +82,15 @@ output "iam_identity_center" {
   description = "The configuration for query result location and encryption."
   value = (local.engine_type == "ATHENA_SQL"
     ? {
-      enabled      = aws_athena_workgroup.this.configuration[0].identity_center_configuration[0].enable_identity_center
-      instance     = aws_athena_workgroup.this.configuration[0].identity_center_configuration[0].identity_center_instance_arn
-      service_role = aws_athena_workgroup.this.configuration[0].execution_role
+      enabled = (one(aws_athena_workgroup.this.configuration[0].identity_center_configuration[*].enable_identity_center) != null
+        ? one(aws_athena_workgroup.this.configuration[0].identity_center_configuration[*].enable_identity_center)
+        : false
+      )
+      instance = one(aws_athena_workgroup.this.configuration[0].identity_center_configuration[*].identity_center_instance_arn)
+      service_role = (one(aws_athena_workgroup.this.configuration[0].identity_center_configuration[*].enable_identity_center) != null
+        ? aws_athena_workgroup.this.configuration[0].execution_role
+        : null
+      )
     }
     : null
   )
@@ -105,6 +111,19 @@ output "per_query_data_usage_limit" {
   value       = var.per_query_data_usage_limit
 }
 
+output "prepared_statements" {
+  description = "The list of Athena prepared statements."
+  value = {
+    for name, query in aws_athena_prepared_statement.this :
+    name => {
+      id          = query.id
+      name        = query.name
+      description = query.description
+      query       = query.query_statement
+    }
+  }
+}
+
 output "named_queries" {
   description = "The list of Athena named queries."
   value = {
@@ -114,6 +133,7 @@ output "named_queries" {
       name        = query.name
       description = query.description
       database    = query.database
+      query       = query.query
     }
   }
 }

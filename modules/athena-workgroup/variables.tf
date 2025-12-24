@@ -190,9 +190,26 @@ variable "per_query_data_usage_limit" {
   default     = null
 }
 
+variable "prepared_statements" {
+  description = <<EOF
+  (Optional) A list of prepared statements to reuse later. A `prepared_statements` block as defined below.
+    (Required) `name` - The name of the prepared statement. Maximum length of 256.
+    (Optional) `description` - A brief explanation of the prepared statements. Defaults to `Managed by Terraform.`.
+    (Required) `query` - The query string for the prepared statement.
+  EOF
+  type = list(object({
+    name        = string
+    description = optional(string, "Managed by Terraform.")
+
+    query = string
+  }))
+  default  = []
+  nullable = false
+}
+
 variable "named_queries" {
   description = <<EOF
-  (Optional) A set of named queries to reuse later. A `named_queries` block as defined below.
+  (Optional) A list of named queries to reuse later. A `named_queries` block as defined below.
     (Required) `name` - The plain language name for the query. Maximum length of 128.
     (Optional) `description` - A brief explanation of the query. Defaults to `Managed by Terraform.`.
     (Required) `database` - The database to which the query belongs.
