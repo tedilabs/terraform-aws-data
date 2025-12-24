@@ -25,7 +25,7 @@ module "share" {
   name = "${local.ram_share_name_prefix}.${each.key}"
 
   resources = {
-    (local.account_id) = local.arn,
+    (local.account_id) = local.arn
   }
   permissions = each.value.permissions
 
