@@ -19,22 +19,51 @@ locals {
 # Database for Glue Data Catalog
 ###################################################
 
-# - create_table_default_permission
+# TODO: LakeFormation Only
+# create_table_default_permission - (Optional) Creates a set of default permissions on the table for principals. See create_table_default_permission below.
 #   - permissions
 #   - principal
 #     - data_lake_principal_identifier
-# - parameters
-# - target_database
-#   - catalog_id
-#   - database_name
 resource "aws_glue_catalog_database" "this" {
+  region = var.region
+
   catalog_id = var.catalog
 
-  name         = var.name
-  description  = var.description
+  name = var.name
+  description = (var.target_database == null
+    ? var.description
+    : null
+  )
   location_uri = var.location_uri
 
-  # parameters = var.parameters
+  parameters = var.parameters
+
+
+  ## Federated
+  dynamic "federated_database" {
+    for_each = var.federated_database != null ? [var.federated_database] : []
+    iterator = db
+
+    content {
+      identifier      = db.value.id
+      connection_name = db.value.connection
+    }
+  }
+
+
+  ## LakeFormation
+  # TODO: Ignore description, parameter for target_database
+  dynamic "target_database" {
+    for_each = var.target_database != null ? [var.target_database] : []
+    iterator = db
+
+    content {
+      catalog_id    = db.value.catalog
+      region        = db.value.region
+      database_name = db.value.database
+    }
+  }
+
 
   tags = merge(
     {

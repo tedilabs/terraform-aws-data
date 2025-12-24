@@ -1,7 +1,15 @@
+variable "region" {
+  description = "(Optional) The region in which to create the module resources. If not provided, the module resources will be created in the provider's configured region."
+  type        = string
+  default     = null
+  nullable    = true
+}
+
 variable "catalog" {
   description = "(Optional) The ID of the Data Catalog in which to create the database. If omitted, this defaults to the AWS Account ID."
   type        = string
   default     = null
+  nullable    = true
 }
 
 variable "name" {
@@ -18,7 +26,7 @@ variable "description" {
 }
 
 variable "location_uri" {
-  description = "(Optional) The location of the database. For example, an HDFS path."
+  description = "(Optional) The location URI of the database. An S3 location is required for managed tables and Zero-ETL integrations."
   type        = string
   default     = ""
   nullable    = false
@@ -26,26 +34,42 @@ variable "location_uri" {
 
 variable "parameters" {
   description = <<EOF
-  (Optional) A set of key value pairs that specifies the Lambda function or functions to use for creating the data catalog. The mapping used depends on the catalog type.
-
-  `LAMBDA`
-    Use one of the following sets of required parameters, but not both.
-    - If you have one Lambda function that processes metadata and another for reading the actual data.
-      (Required) `metadata-function` - The ARN of Lambda function to process metadata.
-      (Required) `record-function` - The ARN of Lambda function to read the actual data.
-    - If you have a composite Lambda function that processes both metadata and data.
-      (Required) `function` - The ARN of a composite Lambda function to process both metadata and data.
-
-  `GLUE`
-    (Required) `catalog_id` - The account ID of the AWS account to which the Glue Data Catalog belongs.
-
-  `HIVE`
-    (Required) `metadata-function` - The ARN of Lambda function to process metadata.
-    (Optional) `sdk-version` - Defaults to the currently supported version.
+  (Optional) These key-value pairs define parameters and properties of the database.
   EOF
   type        = map(string)
   default     = {}
   nullable    = false
+}
+
+variable "federated_database" {
+  description = <<EOF
+  (Optional) A configuration of federated database to reference an entity outside the AWS Glue Data Catalog. `federated_database` as defined below.
+    (Optional) `id` - The unique ID for the federated database.
+    (Optional) `connection` - The name of the connection to the external metastore.
+  EOF
+  type = object({
+    id         = optional(string)
+    connection = optional(string)
+    # TODO:Support connection type
+  })
+  default  = null
+  nullable = true
+}
+
+variable "target_database" {
+  description = <<EOF
+  (Optional) A configuration of a target database for resource linking. `target_database` as defined below.
+    (Required) `catalog` - The ID of the Data Catalog in which the target database resides.
+    (Optional) `region` - The region in which the target database resides. If omitted, this defaults to the provider's configured region.
+    (Required) `database` - The name of the target database.
+  EOF
+  type = object({
+    catalog  = string
+    region   = optional(string)
+    database = string
+  })
+  default  = null
+  nullable = true
 }
 
 variable "tags" {
@@ -67,8 +91,21 @@ variable "module_tags_enabled" {
 # Resource Group
 ###################################################
 
-
-
+variable "resource_group" {
+  description = <<EOF
+  (Optional) A configurations of Resource Group for this module. `resource_group` as defined below.
+    (Optional) `enabled` - Whether to create Resource Group to find and group AWS resources which are created by this module. Defaults to `true`.
+    (Optional) `name` - The name of Resource Group. A Resource Group name can have a maximum of 127 characters, including letters, numbers, hyphens, dots, and underscores. The name cannot start with `AWS` or `aws`. If not provided, a name will be generated using the module name and instance name.
+    (Optional) `description` - The description of Resource Group. Defaults to `Managed by Terraform.`.
+  EOF
+  type = object({
+    enabled     = optional(bool, true)
+    name        = optional(string, "")
+    description = optional(string, "Managed by Terraform.")
+  })
+  default  = {}
+  nullable = false
+}
 
 
 ###################################################
@@ -95,21 +132,5 @@ variable "shares" {
     tags = optional(map(string), {})
   }))
   default  = []
-  nullable = false
-}
-
-variable "resource_group" {
-  description = <<EOF
-  (Optional) A configurations of Resource Group for this module. `resource_group` as defined below.
-    (Optional) `enabled` - Whether to create Resource Group to find and group AWS resources which are created by this module. Defaults to `true`.
-    (Optional) `name` - The name of Resource Group. A Resource Group name can have a maximum of 127 characters, including letters, numbers, hyphens, dots, and underscores. The name cannot start with `AWS` or `aws`. If not provided, a name will be generated using the module name and instance name.
-    (Optional) `description` - The description of Resource Group. Defaults to `Managed by Terraform.`.
-  EOF
-  type = object({
-    enabled     = optional(bool, true)
-    name        = optional(string, "")
-    description = optional(string, "Managed by Terraform.")
-  })
-  default  = {}
   nullable = false
 }

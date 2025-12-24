@@ -1,3 +1,8 @@
+output "region" {
+  description = "The AWS region this module resources resides in."
+  value       = aws_glue_catalog_database.this.region
+}
+
 output "arn" {
   description = "The Amazon Resource Name (ARN) of the Glue Catalog Database."
   value       = aws_glue_catalog_database.this.arn
@@ -33,24 +38,25 @@ output "parameters" {
   value       = aws_glue_catalog_database.this.parameters
 }
 
-# output "z" {
-#   value       = {
-#     for k, v in aws_glue_catalog_database.this :
-#     k => v
-#     if !contains(["name", "description", "catalog_id", "location_uri", "arn", "id", "tags", "tags_all"], k)
-#   }
-# }
-
-output "sharing" {
+output "federated_database" {
   description = <<EOF
-  The configuration for sharing of the Glue Database.
-    `status` - An indication of whether the database is shared with other AWS accounts, or was shared with the current account by another AWS account. Sharing is configured through AWS Resource Access Manager (AWS RAM). Values are `NOT_SHARED`, `SHARED_BY_ME` or `SHARED_WITH_ME`.
-    `shares` - The list of resource shares via RAM (Resource Access Manager).
+  The configuration of federated database to reference an entity outside the AWS Glue Data Catalog.
   EOF
-  value = {
-    status = length(module.share) > 0 ? "SHARED_BY_ME" : "NOT_SHARED"
-    shares = module.share
-  }
+  value = length(aws_glue_catalog_database.this.federated_database) > 0 ? {
+    id         = aws_glue_catalog_database.this.federated_database[0].identifier
+    connection = aws_glue_catalog_database.this.federated_database[0].connection_name
+  } : null
+}
+
+output "target_database" {
+  description = <<EOF
+  The configuration of a target database for resource linking.
+  EOF
+  value = length(aws_glue_catalog_database.this.target_database) > 0 ? {
+    catalog  = aws_glue_catalog_database.this.target_database[0].catalog_id
+    region   = aws_glue_catalog_database.this.target_database[0].region
+    database = aws_glue_catalog_database.this.target_database[0].database_name
+  } : null
 }
 
 output "resource_group" {
@@ -68,3 +74,23 @@ output "resource_group" {
     )
   )
 }
+
+output "sharing" {
+  description = <<EOF
+  The configuration for sharing of the Glue Database.
+    `status` - An indication of whether the database is shared with other AWS accounts, or was shared with the current account by another AWS account. Sharing is configured through AWS Resource Access Manager (AWS RAM). Values are `NOT_SHARED`, `SHARED_BY_ME` or `SHARED_WITH_ME`.
+    `shares` - The list of resource shares via RAM (Resource Access Manager).
+  EOF
+  value = {
+    status = length(module.share) > 0 ? "SHARED_BY_ME" : "NOT_SHARED"
+    shares = module.share
+  }
+}
+
+# output "debug" {
+#   value = {
+#     for k, v in aws_glue_catalog_database.this :
+#     k => v
+#     if !contains(["name", "description", "catalog_id", "location_uri", "arn", "id", "tags", "tags_all", "parameters", "region"], k)
+#   }
+# }
