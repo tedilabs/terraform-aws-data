@@ -136,13 +136,38 @@ variable "iam_identity_center" {
   (Optional) The configuration for IAM Identity Center authentication. An `iam_identity_center` block as defined below.
     (Optional) `enabled` - Whether to enable IAM Identity Center authentication for the workgroup. Defaults to `false`.
     (Optional) `instance` - The Amazon Resource Name (ARN) of the IAM Identity Center instance to use for authentication.
+    (Optional) `default_service_role` - A configurations for default IAM Role to be used by workgroup members authenticated via IAM Identity Center. Use `service_role` if `default_service_role.enabled` is `false`. `default_service_role` as defined below.
+      (Optional) `enabled` - Whether to create default IAM Role for workgroup members authenticated via IAM Identity Center. Defaults to `true`.
+      (Optional) `name` - The name of the IAM Role. If not provided, a name will be generated using the module name and instance name.
+      (Optional) `path` - The path for the IAM Role. Defaults to `/`.
+      (Optional) `description` - The description of the IAM Role. Defaults to `Managed by Terraform.`.
+      (Optional) `policies` - A list of IAM Policy ARNs to attach to the IAM Role. Defaults to an empty list.
+      (Optional) `inline_policies` - A map of names to inline policy documents to attach to the IAM Role. Defaults to an empty map.
+    (Optional) `service_role` - The Amazon Resource Name (ARN) of the IAM Role to be used by workgroup members authenticated via IAM Identity Center. Only required if `default_service_role.enabled` is `false`.
   EOF
   type = object({
     enabled  = optional(bool, false)
     instance = optional(string)
+    default_service_role = optional(object({
+      enabled         = optional(bool, true)
+      name            = optional(string)
+      path            = optional(string, "/")
+      description     = optional(string, "Managed by Terraform.")
+      policies        = optional(list(string), [])
+      inline_policies = optional(map(string), {})
+    }), {})
+    service_role = optional(string)
   })
   default  = {}
   nullable = false
+
+  validation {
+    condition = anytrue([
+      !var.iam_identity_center.enabled,
+      var.iam_identity_center.enabled && var.query_result.management_mode == "CUSTOMER_MANAGED"
+    ])
+    error_message = "When `iam_identity_center.enabled` is `true`, `query_result.management_mode` should be `CUSTOMER_MANAGED`."
+  }
 }
 
 variable "cloudwatch_metrics_enabled" {

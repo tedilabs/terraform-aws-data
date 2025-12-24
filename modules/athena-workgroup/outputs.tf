@@ -82,8 +82,9 @@ output "iam_identity_center" {
   description = "The configuration for query result location and encryption."
   value = (local.engine_type == "ATHENA_SQL"
     ? {
-      enabled  = aws_athena_workgroup.this.configuration[0].identity_center_configuration[0].enable_identity_center
-      instance = aws_athena_workgroup.this.configuration[0].identity_center_configuration[0].identity_center_instance_arn
+      enabled      = aws_athena_workgroup.this.configuration[0].identity_center_configuration[0].enable_identity_center
+      instance     = aws_athena_workgroup.this.configuration[0].identity_center_configuration[0].identity_center_instance_arn
+      service_role = aws_athena_workgroup.this.configuration[0].execution_role
     }
     : null
   )

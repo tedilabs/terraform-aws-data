@@ -103,6 +103,14 @@ resource "aws_athena_workgroup" "this" {
 
 
     ## Auth
+    execution_role = (local.engine_type == "ATHENA_SQL" && var.iam_identity_center.enabled
+      ? local.iam_identity_center_service_role
+      : (local.engine_type == "APACHE_SPARK"
+        # TODO: Add IAM Role for APACHE_SPARK engine type
+        ? null
+        : null
+      )
+    )
     dynamic "identity_center_configuration" {
       for_each = (local.engine_type == "ATHENA_SQL"
         ? [var.iam_identity_center]
