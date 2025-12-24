@@ -1,3 +1,8 @@
+output "region" {
+  description = "The AWS region this module resources resides in."
+  value       = aws_athena_workgroup.this.region
+}
+
 output "arn" {
   description = "The Amazon Resource Name (ARN) of the workgroup."
   value       = aws_athena_workgroup.this.arn
@@ -28,9 +33,60 @@ output "force_destroy" {
   value       = var.force_destroy
 }
 
-output "client_config_enabled" {
-  description = "Whether overriding workgroup configurations with client-side configurations is allowed."
-  value       = var.client_config_enabled
+output "analytics_engine" {
+  description = "The configuration for the Athena engine version."
+  value = {
+    version           = var.analytics_engine.version
+    effective_version = aws_athena_workgroup.this.configuration[0].engine_version[0].effective_engine_version
+  }
+}
+
+output "query_result" {
+  description = "The configuration for query result location and encryption."
+  value = (local.engine_type == "ATHENA_SQL"
+    ? {
+      management_mode        = aws_athena_workgroup.this.configuration[0].managed_query_results_configuration[0].enabled ? "ATHENA_MANAGED" : "CUSTOMER_MANAGED"
+      override_client_config = aws_athena_workgroup.this.configuration[0].enforce_workgroup_configuration
+
+      athena_managed_query_result = (aws_athena_workgroup.this.configuration[0].managed_query_results_configuration[0].enabled
+        ? {
+          encryption = {
+            kms_key = aws_athena_workgroup.this.configuration[0].managed_query_results_configuration[0].encryption_configuration[0].kms_key
+          }
+        }
+        : null
+      )
+      customer_managed_query_result = (!aws_athena_workgroup.this.configuration[0].managed_query_results_configuration[0].enabled
+        ? {
+          s3_bucket = {
+            uri                               = aws_athena_workgroup.this.configuration[0].result_configuration[0].output_location
+            name                              = var.query_result.customer_managed_query_result.s3_bucket.name
+            key_prefix                        = var.query_result.customer_managed_query_result.s3_bucket.key_prefix
+            expected_bucket_owner             = aws_athena_workgroup.this.configuration[0].result_configuration[0].expected_bucket_owner
+            bucket_owner_full_control_enabled = one(aws_athena_workgroup.this.configuration[0].result_configuration[0].acl_configuration) != null
+          }
+          encryption = {
+            enabled = one(aws_athena_workgroup.this.configuration[0].result_configuration[0].encryption_configuration) != null
+            mode    = one(aws_athena_workgroup.this.configuration[0].result_configuration[0].encryption_configuration[*].encryption_option)
+            kms_key = one(aws_athena_workgroup.this.configuration[0].result_configuration[0].encryption_configuration[*].kms_key_arn)
+          }
+        }
+        : null
+      )
+    }
+    : null
+  )
+}
+
+output "iam_identity_center" {
+  description = "The configuration for query result location and encryption."
+  value = (local.engine_type == "ATHENA_SQL"
+    ? {
+      enabled  = aws_athena_workgroup.this.configuration[0].identity_center_configuration[0].enable_identity_center
+      instance = aws_athena_workgroup.this.configuration[0].identity_center_configuration[0].identity_center_instance_arn
+    }
+    : null
+  )
 }
 
 output "cloudwatch_metrics_enabled" {
@@ -46,22 +102,6 @@ output "query_on_s3_requester_pays_bucket_enabled" {
 output "per_query_data_usage_limit" {
   description = "The limit in bytes for the maximum amount of data a query is allowed to scan"
   value       = var.per_query_data_usage_limit
-}
-
-output "query_result" {
-  description = "The configuration for query result location and encryption."
-  value = {
-    s3_bucket     = try(var.query_result.s3_bucket, null)
-    s3_key_prefix = local.query_result_s3_key_prefix
-    s3_path       = local.query_result_s3_path
-
-    s3_bucket_expected_owner             = try(var.query_result.s3_bucket_expected_owner, null)
-    s3_bucket_owner_full_control_enabled = try(var.query_result.s3_bucket_owner_full_control_enabled, false)
-
-    encryption_enabled = try(var.query_result.encryption_enabled, false)
-    encryption_mode    = try(aws_athena_workgroup.this.configuration[0].result_configuration[0].encryption_configuration[0].encryption_option, null)
-    encryption_kms_key = try(aws_athena_workgroup.this.configuration[0].result_configuration[0].encryption_configuration[0].kms_key_arn, null)
-  }
 }
 
 output "named_queries" {

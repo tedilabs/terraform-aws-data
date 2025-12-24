@@ -14,22 +14,31 @@ locals {
   } : {}
 }
 
-locals {
-  query_result_s3_key_prefix = try(trim(var.query_result.s3_key_prefix, "/"), "")
-  query_result_s3_path = (var.query_result != null
-    ? "s3://${trim(var.query_result.s3_bucket, "/")}/${local.query_result_s3_key_prefix}"
-    : null
-  )
+data "aws_ssoadmin_instances" "default" {
+  count = local.engine_type == "ATHENA_SQL" && var.iam_identity_center.enabled && (var.iam_identity_center.instance == null || var.iam_identity_center.instance == "") ? 1 : 0
 
+  region = var.region
+}
+
+locals {
   engine_versions = {
-    "AUTO"      = "AUTO"
-    "ATHENA_V2" = "Athena engine version 2"
-    "ATHENA_V3" = "Athena engine version 3"
+    "AUTO"       = "AUTO"
+    "ATHENA_V3"  = "Athena engine version 3"
+    "PYSPARK_V3" = "PySpark engine version 3"
+    "SPARK_V3.5" = "Apache Spark version 3.5"
   }
+  engine_type = {
+    "AUTO"       = "ATHENA_SQL"
+    "ATHENA_V3"  = "ATHENA_SQL"
+    "PYSPARK_V3" = "APACHE_SPARK"
+    "SPARK_V3.5" = "APACHE_SPARK"
+  }[var.analytics_engine.version]
 }
 
 
 resource "aws_athena_workgroup" "this" {
+  region = var.region
+
   name        = var.name
   description = var.description
 
@@ -37,41 +46,93 @@ resource "aws_athena_workgroup" "this" {
   force_destroy = var.force_destroy
 
   configuration {
-    enforce_workgroup_configuration    = !var.client_config_enabled
-    publish_cloudwatch_metrics_enabled = var.cloudwatch_metrics_enabled
-    requester_pays_enabled             = var.query_on_s3_requester_pays_bucket_enabled
-    bytes_scanned_cutoff_per_query     = var.per_query_data_usage_limit
-
+    ## Analytics Engine
     engine_version {
-      selected_engine_version = "AUTO"
+      selected_engine_version = local.engine_versions[var.analytics_engine.version]
+    }
+
+
+    ## Query Result (for ATHENA_SQL engine types)
+    enforce_workgroup_configuration = var.query_result.override_client_config
+
+    dynamic "managed_query_results_configuration" {
+      for_each = local.engine_type == "ATHENA_SQL" ? [var.query_result] : []
+      iterator = config
+
+      content {
+        enabled = config.value.management_mode == "ATHENA_MANAGED"
+
+        dynamic "encryption_configuration" {
+          for_each = config.value.management_mode == "ATHENA_MANAGED" ? [config.value.athena_managed_query_result.encryption] : []
+          iterator = encryption
+
+          content {
+            kms_key = encryption.value.kms_key
+          }
+        }
+      }
     }
 
     dynamic "result_configuration" {
-      for_each = local.query_result_s3_path != null ? ["go"] : []
+      for_each = local.engine_type == "ATHENA_SQL" && var.query_result.management_mode == "CUSTOMER_MANAGED" ? [var.query_result.customer_managed_query_result] : []
+      iterator = config
 
       content {
-        output_location       = local.query_result_s3_path
-        expected_bucket_owner = try(var.query_result.s3_bucket_expected_owner, null)
-
-        dynamic "encryption_configuration" {
-          for_each = try(var.query_result.encryption_enabled, false) ? ["go"] : []
-
-          content {
-            encryption_option = try(var.query_result.encryption_mode, "SSE_S3")
-            kms_key_arn       = try(var.query_result.encryption_kms_key, null)
-          }
-        }
+        output_location       = "s3://${config.value.s3_bucket.name}/${config.value.s3_bucket.key_prefix}"
+        expected_bucket_owner = config.value.s3_bucket.expected_bucket_owner
 
         dynamic "acl_configuration" {
-          for_each = try(var.query_result.s3_bucket_owner_full_control_enabled, false) ? ["go"] : []
+          for_each = config.value.s3_bucket.bucket_owner_full_control_enabled ? ["go"] : []
 
           content {
             s3_acl_option = "BUCKET_OWNER_FULL_CONTROL"
           }
         }
+
+        dynamic "encryption_configuration" {
+          for_each = config.value.encryption.enabled ? [config.value.encryption] : []
+          iterator = encryption
+
+          content {
+            encryption_option = encryption.value.mode
+            kms_key_arn       = contains(["SSE_KMS", "CSE_KMS"], encryption.value.mode) ? encryption.value.kms_key : null
+          }
+        }
       }
     }
+
+
+    ## Auth
+    dynamic "identity_center_configuration" {
+      for_each = (local.engine_type == "ATHENA_SQL"
+        ? [var.iam_identity_center]
+        : []
+      )
+      iterator = config
+
+      content {
+        enable_identity_center = config.value.enabled
+        identity_center_instance_arn = (length(data.aws_ssoadmin_instances.default) > 0
+          ? data.aws_ssoadmin_instances.default[0].arns[0]
+          : config.value.instance
+        )
+      }
+    }
+
+
+    ## Settings
+    # For Common
+    publish_cloudwatch_metrics_enabled = var.cloudwatch_metrics_enabled
+
+
+    # For ATHENA_SQL engine types
+    requester_pays_enabled         = local.engine_type == "ATHENA_SQL" ? var.query_on_s3_requester_pays_bucket_enabled : null
+    bytes_scanned_cutoff_per_query = var.per_query_data_usage_limit
+
+
+    # For APACHE_SPARK engine types
   }
+
 
   tags = merge(
     {
@@ -92,6 +153,8 @@ resource "aws_athena_named_query" "this" {
     for query in var.named_queries :
     "${query.database}:${query.name}" => query
   }
+
+  region = var.region
 
   workgroup   = aws_athena_workgroup.this.id
   name        = each.value.name
