@@ -14,15 +14,17 @@ locals {
   } : {}
 }
 
-data "aws_partition" "this" {}
-data "aws_region" "this" {}
 data "aws_caller_identity" "this" {}
+data "aws_partition" "this" {}
+data "aws_region" "this" {
+  region = var.region
+}
 
 locals {
-  partition  = data.aws_partition.this.partition
-  region     = data.aws_region.this.name
   account_id = data.aws_caller_identity.this.account_id
-  arn        = "arn:${local.partition}:glue:${local.region}:${local.account_id}:catalog"
+  partition  = data.aws_partition.this.partition
+  region     = data.aws_region.this.region
+  arn        = provider::aws::arn_build(local.partition, "glue", local.region, local.account_id, "catalog")
 }
 
 
@@ -31,6 +33,8 @@ locals {
 ###################################################
 
 resource "aws_glue_data_catalog_encryption_settings" "this" {
+  region = var.region
+
   catalog_id = var.catalog
 
   data_catalog_encryption_settings {
@@ -43,9 +47,13 @@ resource "aws_glue_data_catalog_encryption_settings" "this" {
     }
 
     encryption_at_rest {
-      catalog_encryption_mode = var.encryption_at_rest.enabled ? "SSE-KMS" : "DISABLED"
+      catalog_encryption_mode = var.encryption_at_rest.enabled ? var.encryption_at_rest.mode : "DISABLED"
       sse_aws_kms_key_id = (var.encryption_at_rest.enabled
         ? var.encryption_at_rest.kms_key
+        : null
+      )
+      catalog_encryption_service_role = (var.encryption_at_rest.enabled
+        ? var.encryption_at_rest.service_role
         : null
       )
     }
@@ -58,7 +66,9 @@ resource "aws_glue_data_catalog_encryption_settings" "this" {
 ###################################################
 
 resource "aws_glue_resource_policy" "this" {
-  count = length(var.policy) > 16 ? 1 : 0
+  count = length(var.policy) > 0 ? 1 : 0
+
+  region = var.region
 
   policy        = var.policy
   enable_hybrid = "TRUE"
