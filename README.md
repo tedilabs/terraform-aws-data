@@ -24,6 +24,8 @@ Terraform Modules from [this package](https://github.com/tedilabs/terraform-aws-
 - **AWS Athena**
   - Data Catalog
   - Workgroup
+    - Named Query
+    - Prepared Statement
 - **AWS Glue**
   - Data Catalog
     - Connection
