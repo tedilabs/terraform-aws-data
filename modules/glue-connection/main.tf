@@ -17,7 +17,14 @@ locals {
 data "aws_subnet" "this" {
   count = var.vpc_association.enabled ? 1 : 0
 
+  region = var.region
+
   id = var.vpc_association.subnet
+}
+
+locals {
+  vpc_id            = var.vpc_association.enabled ? data.aws_subnet.this[0].vpc_id : null
+  availability_zone = var.vpc_association.enabled ? data.aws_subnet.this[0].availability_zone : null
 }
 
 
@@ -26,6 +33,8 @@ data "aws_subnet" "this" {
 ###################################################
 
 resource "aws_glue_connection" "this" {
+  region = var.region
+
   catalog_id = var.catalog
 
   name        = var.name
@@ -33,15 +42,16 @@ resource "aws_glue_connection" "this" {
 
   connection_type       = var.type
   connection_properties = var.properties
+  athena_properties     = var.athena_properties
 
   dynamic "physical_connection_requirements" {
     for_each = var.vpc_association.enabled ? [var.vpc_association] : []
     iterator = association
 
     content {
-      availability_zone      = one(data.aws_subnet.this[*].availability_zone)
+      availability_zone      = local.availability_zone
       subnet_id              = association.value.subnet
-      security_group_id_list = association.value.security_groups
+      security_group_id_list = local.security_groups
     }
   }
 

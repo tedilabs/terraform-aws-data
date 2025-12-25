@@ -1,3 +1,8 @@
+output "region" {
+  description = "The AWS region this module resources resides in."
+  value       = aws_glue_connection.this.region
+}
+
 output "arn" {
   description = "The Amazon Resource Name (ARN) of the Glue connection."
   value       = aws_glue_connection.this.arn
@@ -34,6 +39,16 @@ output "properties" {
   sensitive   = true
 }
 
+output "athena_properties" {
+  description = "A map of key-value pairs used as parameters for Athena connections."
+  value       = aws_glue_connection.this.athena_properties
+}
+
+output "match_criteria" {
+  description = "A list of criteria that can be used in selecting this connection."
+  value       = aws_glue_connection.this.match_criteria
+}
+
 output "vpc_association" {
   description = "A configuration for additional VPC association of the Glue connection when your AWS Glue job needs to run on Amazon Elastic Compute Cloud (EC2) instances in a virtual private cloud (VPC) subnet."
   value = (var.vpc_association.enabled
@@ -42,14 +57,17 @@ output "vpc_association" {
       availability_zone = aws_glue_connection.this.physical_connection_requirements[0].availability_zone
       subnet            = aws_glue_connection.this.physical_connection_requirements[0].subnet_id
 
+      default_security_group = (var.vpc_association.default_security_group.enabled
+        ? {
+          id          = module.security_group[0].id
+          name        = module.security_group[0].name
+          description = module.security_group[0].description
+        }
+        : null
+      )
       security_groups = aws_glue_connection.this.physical_connection_requirements[0].security_group_id_list
     } : null
   )
-}
-
-output "match_criteria" {
-  description = "A list of criteria that can be used in selecting this connection."
-  value       = aws_glue_connection.this.match_criteria
 }
 
 output "resource_group" {
