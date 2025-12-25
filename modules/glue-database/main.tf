@@ -30,13 +30,16 @@ resource "aws_glue_catalog_database" "this" {
   catalog_id = var.catalog
 
   name = var.name
-  description = (var.target_database == null
+  description = (var.target_database == null && var.federated_database == null
     ? var.description
     : null
   )
   location_uri = var.location_uri
 
-  parameters = var.parameters
+  parameters = (var.target_database == null && var.federated_database == null
+    ? var.parameters
+    : null
+  )
 
 
   ## Federated
