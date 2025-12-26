@@ -26,7 +26,7 @@ module "security_group" {
     var.vpc_association.default_security_group.ingress_rules,
     [
       {
-        id          = "glue-tcp-self"
+        id          = "glue-tcp"
         description = "Allow all TCP traffic from self."
         protocol    = "tcp"
         from_port   = 0
@@ -40,13 +40,15 @@ module "security_group" {
     var.vpc_association.default_security_group.egress_rules,
     [
       {
-        id          = "glue-all-self"
+        id          = "glue-all"
         description = "Allow all traffic from self."
         protocol    = -1
         from_port   = 0
         to_port     = 65535
 
-        self = true
+        ipv4_cidrs = ["0.0.0.0/0"]
+        ipv6_cidrs = ["::/0"]
+        self       = true
       }
     ]
   )
