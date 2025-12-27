@@ -44,6 +44,7 @@ resource "aws_glue_connection" "this" {
   connection_properties = var.properties
   athena_properties     = var.athena_properties
 
+  # INFO: Need to communicate with RDS, S3, SecretsManager resources.
   dynamic "physical_connection_requirements" {
     for_each = var.vpc_association.enabled ? [var.vpc_association] : []
     iterator = association
