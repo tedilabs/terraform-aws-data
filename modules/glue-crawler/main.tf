@@ -31,6 +31,8 @@ locals {
 ###################################################
 
 resource "aws_glue_crawler" "this" {
+  region = var.region
+
   name        = var.name
   description = var.description
 
@@ -40,13 +42,13 @@ resource "aws_glue_crawler" "this" {
     crawler_lineage_settings = var.data_lineage_enabled ? "ENABLE" : "DISABLE"
   }
 
-  ## Data Target
-  database_name = var.database
-  table_prefix  = var.table_prefix
+  ## Destination
+  database_name = var.destination.database
+  table_prefix  = var.destination.table_prefix
 
 
   ## Data Sources
-  classifiers = var.classifiers
+  classifiers = var.custom_classifiers
 
   dynamic "catalog_target" {
     for_each = var.catalog_data_sources
@@ -57,8 +59,8 @@ resource "aws_glue_crawler" "this" {
       tables          = source.value.tables
       connection_name = source.value.connection
 
-      event_queue_arn     = var.on_recrawl_behavior == "CRAWL_EVENT_MODE" ? source.value.event_mode.sqs_queue : null
-      dlq_event_queue_arn = var.on_recrawl_behavior == "CRAWL_EVENT_MODE" ? source.value.event_mode.sqs_dead_letter_queue : null
+      event_queue_arn     = var.recrawl_behavior == "CRAWL_EVENT_MODE" ? source.value.event_mode.sqs_queue : null
+      dlq_event_queue_arn = var.recrawl_behavior == "CRAWL_EVENT_MODE" ? source.value.event_mode.sqs_dead_letter_queue : null
     }
   }
 
@@ -123,32 +125,39 @@ resource "aws_glue_crawler" "this" {
       exclusions  = source.value.exclusion_patterns
       sample_size = source.value.sample_size
 
-      event_queue_arn     = var.on_recrawl_behavior == "CRAWL_EVENT_MODE" ? source.value.event_mode.sqs_queue : null
-      dlq_event_queue_arn = var.on_recrawl_behavior == "CRAWL_EVENT_MODE" ? source.value.event_mode.sqs_dead_letter_queue : null
+      event_queue_arn     = var.recrawl_behavior == "CRAWL_EVENT_MODE" ? source.value.event_mode.sqs_queue : null
+      dlq_event_queue_arn = var.recrawl_behavior == "CRAWL_EVENT_MODE" ? source.value.event_mode.sqs_dead_letter_queue : null
     }
   }
 
 
   ## Scheduling
-  schedule = var.schedule
+  schedule = (var.schedule.type == "CRON_EXPRESSION"
+    ? var.schedule.expression
+    : null
+  )
 
   recrawl_policy {
-    recrawl_behavior = var.on_recrawl_behavior
+    recrawl_behavior = var.recrawl_behavior
   }
 
   schema_change_policy {
-    delete_behavior = var.on_object_deletion_behavior
-    update_behavior = var.on_schema_change_behavior
+    delete_behavior = var.schema_change_policy.delete_behavior
+    update_behavior = var.schema_change_policy.update_behavior
   }
 
 
   ## Security
-  role                   = coalesce(var.custom_iam_role, one(module.role[*].arn))
+  role = (var.default_service_role.enabled
+    ? module.role[0].arn
+    : var.service_role
+  )
+
   security_configuration = var.security_configuration
 
   lake_formation_configuration {
-    use_lake_formation_credentials = var.lake_formation_credentials_configuration.enabled
-    account_id                     = var.lake_formation_credentials_configuration.account_id
+    use_lake_formation_credentials = var.lake_formation_credentials.enabled
+    account_id                     = var.lake_formation_credentials.account_id
   }
 
 

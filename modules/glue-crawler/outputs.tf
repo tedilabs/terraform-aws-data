@@ -1,3 +1,8 @@
+output "region" {
+  description = "The AWS region this module resources resides in."
+  value       = aws_glue_crawler.this.region
+}
+
 output "arn" {
   description = "The Amazon Resource Name (ARN) of the Glue crawler."
   value       = aws_glue_crawler.this.arn
@@ -28,17 +33,15 @@ output "data_lineage_enabled" {
   value       = aws_glue_crawler.this.lineage_configuration[0].crawler_lineage_settings == "ENABLE"
 }
 
-output "database" {
-  description = "The Glue database where results are written."
-  value       = aws_glue_crawler.this.database_name
+output "destination" {
+  description = "The destination information of the crawler."
+  value = {
+    database     = aws_glue_crawler.this.database_name
+    table_prefix = aws_glue_crawler.this.table_prefix
+  }
 }
 
-output "table_prefix" {
-  description = "The table prefix used for catalog tables that are created."
-  value       = aws_glue_crawler.this.table_prefix
-}
-
-output "classifiers" {
+output "custom_classifiers" {
   description = "A list of custom classifiers to use with this crawler."
   value       = aws_glue_crawler.this.classifiers
 }
@@ -119,40 +122,28 @@ output "data_sources" {
 
 output "schedule" {
   description = "The cron expression used to specify the schedule."
-  value       = aws_glue_crawler.this.schedule
+  value = {
+    type       = var.schedule.type
+    expression = aws_glue_crawler.this.schedule
+  }
 }
 
-output "on_recrawl_behavior" {
+output "recrawl_behavior" {
   description = "The behavior type of the crawler to recrawl from S3 data sources."
   value       = one(aws_glue_crawler.this.recrawl_policy[*].recrawl_behavior)
 }
 
-output "on_object_deletion_behavior" {
-  description = "The behavior type when the crawler finds a deleted object."
-  value       = one(aws_glue_crawler.this.schema_change_policy[*].delete_behavior)
-}
-
-output "on_schema_change_behavior" {
-  description = "The behavior type when the crawler finds a changed schema."
-  value       = one(aws_glue_crawler.this.schema_change_policy[*].update_behavior)
-}
-
-output "iam_role" {
-  description = "The IAM role used by the crawler to access other resources."
+output "schema_change_policy" {
+  description = "The configuration of the crawler's behavior when it detects a change in a table schema."
   value = {
-    arn = coalesce(
-      one(data.aws_iam_role.custom[*].arn),
-      one(module.role[*].arn),
-    )
-    name = coalesce(
-      one(data.aws_iam_role.custom[*].name),
-      one(module.role[*].name),
-    )
-    description = coalesce(
-      one(data.aws_iam_role.custom[*].description),
-      one(module.role[*].description),
-    )
+    delete_behavior = one(aws_glue_crawler.this.schema_change_policy[*].delete_behavior)
+    update_behavior = one(aws_glue_crawler.this.schema_change_policy[*].update_behavior)
   }
+}
+
+output "service_role" {
+  description = "The Amazon Resource Name (ARN) of the IAM role used by the crawler to access other esources."
+  value       = aws_glue_crawler.this.role
 }
 
 output "security_configuration" {
@@ -160,7 +151,7 @@ output "security_configuration" {
   value       = aws_glue_crawler.this.security_configuration
 }
 
-output "lake_formation_credentials_configuration" {
+output "lake_formation_credentials" {
   description = "The configuration of the crawler to use Lake Formation credentials for crawling the data source."
   value = {
     enabled    = one(aws_glue_crawler.this.lake_formation_configuration[*].use_lake_formation_credentials)
@@ -183,3 +174,13 @@ output "resource_group" {
     )
   )
 }
+
+# output "debug" {
+#   value = {
+#     for k, v in aws_glue_crawler.this :
+#     k => v
+#     if !contains([
+#       "tags_all", "tags", "name", "database_name", "region", "arn", "id", "table_prefix", "classifiers", "description", "recrawl_policy", "role", "schedule", "schema_change_policy", "security_configuration"
+#     ], k)
+#   }
+# }

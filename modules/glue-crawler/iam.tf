@@ -1,10 +1,11 @@
-data "aws_iam_role" "custom" {
-  count = var.custom_iam_role != null ? 1 : 0
+data "aws_caller_identity" "this" {}
+data "aws_region" "this" {
+  region = var.region
+}
 
-  name = (startswith(var.custom_iam_role, "arn:aws")
-    ? split(":role/", var.custom_iam_role)[1]
-    : var.custom_iam_role
-  )
+locals {
+  account_id = data.aws_caller_identity.this.account_id
+  region     = data.aws_region.this.region
 }
 
 
@@ -13,29 +14,40 @@ data "aws_iam_role" "custom" {
 ###################################################
 
 module "role" {
-  count = (var.custom_iam_role == null && var.iam_role.enabled) ? 1 : 0
+  count = var.default_service_role.enabled ? 1 : 0
 
   source  = "tedilabs/account/aws//modules/iam-role"
-  version = "~> 0.25.0"
+  version = "~> 0.33.0"
 
-  name        = "aws-glue-crawler-${local.metadata.name}"
-  path        = "/"
-  description = "Role for AWS Glue Crawler (${local.metadata.name})"
-
-  force_detach_policies = true
+  name = coalesce(
+    var.default_service_role.name,
+    "glue-crawler-${local.metadata.name}",
+  )
+  path        = var.default_service_role.path
+  description = var.default_service_role.description
 
   trusted_service_policies = [
     {
       services = ["glue.amazonaws.com"]
     },
   ]
-  conditions = var.iam_role.conditions
 
-  policies        = var.iam_role.policies
-  inline_policies = var.iam_role.inline_policies
+  policies = concat(
+    ["arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole"],
+    var.default_service_role.policies,
+  )
+  inline_policies = merge(
+    {
+      "cloudwatch" = data.aws_iam_policy_document.cloudwatch.json
+    },
+    var.default_service_role.inline_policies
+  )
 
-  resource_group_enabled = false
-  module_tags_enabled    = false
+  force_detach_policies = true
+  resource_group = {
+    enabled = false
+  }
+  module_tags_enabled = false
 
   tags = merge(
     local.module_tags,
@@ -43,3 +55,29 @@ module "role" {
   )
 }
 
+
+###################################################
+# IAM Policies
+###################################################
+
+data "aws_iam_policy_document" "cloudwatch" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+    ]
+    resources = [
+      provider::aws::arn_build("aws", "logs", local.region, local.account_id, "log-group/aws-glue/crawlers"),
+    ]
+  }
+  statement {
+    effect = "Allow"
+    actions = [
+      "logs:PutLogEvents",
+    ]
+    resources = [
+      provider::aws::arn_build("aws", "logs", local.region, local.account_id, "log-group/aws-glue/crawlers:log-stream:${var.name}"),
+    ]
+  }
+}

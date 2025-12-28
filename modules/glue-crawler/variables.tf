@@ -1,3 +1,10 @@
+variable "region" {
+  description = "(Optional) The region in which to create the module resources. If not provided, the module resources will be created in the provider's configured region."
+  type        = string
+  default     = null
+  nullable    = true
+}
+
 variable "name" {
   description = "(Required) The name of the crawler. Can be up to 255 characters long. Some character set including control characters are prohibited."
   type        = string
@@ -25,21 +32,21 @@ variable "data_lineage_enabled" {
   nullable    = false
 }
 
-variable "database" {
-  description = "(Required) The Glue database where results are written."
-  type        = string
-  nullable    = false
+variable "destination" {
+  description = <<EOF
+  (Required) A configuration of the Glue database where results are written. `destination` as defined below.
+    (Required) `database` - The Glue database where results are written.
+    (Optional) `table_prefix` - The table prefix used for catalog tables that are created. This prefix will be added to table names.
+  EOF
+  type = object({
+    database     = string
+    table_prefix = optional(string, "")
+  })
+  nullable = false
 }
 
-variable "table_prefix" {
-  description = "(Optional) The table prefix used for catalog tables that are created."
-  type        = string
-  default     = ""
-  nullable    = false
-}
-
-variable "classifiers" {
-  description = "(Optional) A list of custom classifiers to use with this crawler. A classifier checks whether a given file is in a format the crawler can handle. If it is, the classifier creates a schema in the form of a StructType object that matches that data format. By default, all AWS classifiers are included in a crawl, but these custom classifiers always override the default classifiers for a given classification."
+variable "custom_classifiers" {
+  description = "(Optional) A set of custom classifiers to use with this crawler. A classifier checks whether a given file is in a format the crawler can handle. If it is, the classifier creates a schema in the form of a StructType object that matches that data format. By default, all AWS classifiers are included in a crawl, but these custom classifiers always override the default classifiers for a given classification."
   type        = set(string)
   default     = []
   nullable    = false
@@ -224,15 +231,36 @@ variable "s3_data_sources" {
 }
 
 variable "schedule" {
-  description = "(Optional) A cron expression used to specify the schedule. For example, to run something every day at 12:15 UTC, you would specify: `cron(15 12 * * ? *)`."
-  type        = string
-  default     = ""
-  nullable    = false
+  description = <<EOF
+  (Optional) A configuration to schedule the crawler. `schedule` as defined below.
+    (Optional) `type` - The schedule type. Valid values are `ON_DEMAND` and `CRON_EXPRESSION`. Defaults to `ON_DEMAND`.
+      `ON_DEMAND` - The crawler runs only when explicitly started.
+      `CRON_EXPRESSION` - The crawler runs at the time(s) specified in the `expression`.
+    (Optional) `expression` - A cron expression used to specify the schedule. For example, to run something every day at 12:15 UTC, you would specify: `cron(15 12 * * ? *)`.
+  EOF
+  type = object({
+    type       = optional(string, "ON_DEMAND")
+    expression = optional(string, "")
+  })
+  default  = {}
+  nullable = false
+
+  validation {
+    condition     = contains(["ON_DEMAND", "CRON_EXPRESSION"], var.schedule.type)
+    error_message = "Valid values for `schedule.type` are `ON_DEMAND` and `CRON_EXPRESSION`."
+  }
+  validation {
+    condition = anytrue([
+      var.schedule.type != "CRON_EXPRESSION",
+      (var.schedule.type == "CRON_EXPRESSION" && length(var.schedule.expression) > 0),
+    ])
+    error_message = "`schedule.expression` is required when `schedule.type` is `CRON_EXPRESSION`."
+  }
 }
 
-variable "on_recrawl_behavior" {
+variable "recrawl_behavior" {
   description = <<EOF
-  (Optional) A behavior type of the crawler to recrawl from S3 data sources. Specify whether to crawl the entire dataset again, crawl only folders that were added since the last crawler run, or crawl what S3 notifies the crawler of via SQS. Valid Values are `CRAWL_EVERYTHING`, `CRAWL_EVENT_MODE` and `CRAWL_NEW_FOLDERS_ONLY`. Defaults to `CRAWL_EVERYTHING`.
+  (Optional) A behavior type of the crawler whether to crawl the entire dataset again, or to crawl only folders that were added since the last crawler run, or crawl what S3 notifies the crawler of via SQS. Valid Values are `CRAWL_EVERYTHING`, `CRAWL_EVENT_MODE` and `CRAWL_NEW_FOLDERS_ONLY`. Defaults to `CRAWL_EVERYTHING`.
 
     `CRAWL_EVERYTHING` - Crawl all folders again with every subsequent crawl.
     `CRAWL_EVENT_MODE` - Rely on Amazon S3 events to control what folders to crawl.
@@ -243,72 +271,69 @@ variable "on_recrawl_behavior" {
   nullable    = false
 
   validation {
-    condition     = contains(["CRAWL_EVERYTHING", "CRAWL_EVENT_MODE", "CRAWL_NEW_FOLDERS_ONLY"], var.on_recrawl_behavior)
-    error_message = "Valid values for `on_recrawl_behavior` are `CRAWL_EVERYTHING`, `CRAWL_EVENT_MODE`, `CRAWL_NEW_FOLDERS_ONLY`."
+    condition     = contains(["CRAWL_EVERYTHING", "CRAWL_EVENT_MODE", "CRAWL_NEW_FOLDERS_ONLY"], var.recrawl_behavior)
+    error_message = "Valid values for `recrawl_behavior` are `CRAWL_EVERYTHING`, `CRAWL_EVENT_MODE`, `CRAWL_NEW_FOLDERS_ONLY`."
   }
 }
 
-variable "on_object_deletion_behavior" {
+variable "schema_change_policy" {
   description = <<EOF
-  (Optional) A behavior type when the crawler finds a deleted object. Valid values are `LOG`, `DELETE_FROM_DATABASE` and `DEPRECATE_IN_DATABASE`. Defaults to `DEPRECATE_IN_DATABASE`.
+  (Optional) A configuration of the crawler's schema change policy. `schema_change_policy` as defined below.
+    (Optional) `delete_behavior` - The deletion behavior when the crawler finds a deleted object. Valid values are `LOG`, `DELETE_FROM_DATABASE` and `DEPRECATE_IN_DATABASE`. Defaults to `DEPRECATE_IN_DATABASE`.
 
-    `LOG` - Ignore the change and don't update the table in the data catalog.
-    `DELETE_FROM_DATABASE` - Delete tables and partitions from the data catalog.
-    `DEPRECATE_IN_DATABASE` - Mark the table as deprecated in the data catalog. If you run a job that references a deprecated table, the job might fail. Edit jobs that reference deprecated tables to remove them as sources and targets. We recommend that you delete deprecated tables when they are no longer needed.
-  EOF
-  type        = string
-  default     = "DEPRECATE_IN_DATABASE"
-  nullable    = false
+      `LOG` - Ignore the change and don't update the table in the data catalog.
+      `DELETE_FROM_DATABASE` - Delete tables and partitions from the data catalog.
+      `DEPRECATE_IN_DATABASE` - Mark the table as deprecated in the data catalog. If you run a job that references a deprecated table, the job might fail. Edit jobs that reference deprecated tables to remove them as sources and targets. We recommend that you delete deprecated tables when they are no longer needed.
+    (Optional) `update_behavior` - The update behavior when the crawler finds a changed schema. Valid values: `LOG` and `UPDATE_IN_DATABASE`. Defaults to `UPDATE_IN_DATABASE`.
 
-  validation {
-    condition     = contains(["LOG", "DELETE_FROM_DATABASE", "DEPRECATE_IN_DATABASE"], var.on_object_deletion_behavior)
-    error_message = "Valid values for `on_object_deletion_behavior` are `LOG`, `DELETE_FROM_DATABASE`, `DEPRECATE_IN_DATABASE`."
-  }
-}
-
-variable "on_schema_change_behavior" {
-  description = <<EOF
-  (Optional) A behavior type when the crawler finds a changed schema. Valid values: `LOG` and `UPDATE_IN_DATABASE`. Defaults to `UPDATE_IN_DATABASE`.
-
-    `LOG` - Ignore the change and don't update the table in the data catalog.
-    `UPDATE_IN_DATABASE` - Update the table definition in the data catalog.
-  EOF
-  type        = string
-  default     = "UPDATE_IN_DATABASE"
-  nullable    = false
-
-  validation {
-    condition     = contains(["LOG", "UPDATE_IN_DATABASE"], var.on_schema_change_behavior)
-    error_message = "Valid values for `on_schema_change_behavior` are `LOG`, `UPDATE_IN_DATABASE`."
-  }
-}
-
-variable "custom_iam_role" {
-  description = "(Optional) The IAM role friendly name (including path without leading slash), or Amazon Resource Name (ARN) of an IAM role, used by the crawler to access other resources. Provide `custom_iam_role` if you want to use the IAM role from the outside of this module."
-  type        = string
-  default     = null
-  nullable    = true
-}
-
-variable "iam_role" {
-  description = <<EOF
-  (Optional) A configuration of the default IAM role used by the crawler to access other resources. It is only used when `custom_iam_role` is not provided. `iam_role` as defined below.
-    (Optional) `enabled` - Whether to create a default IAM role managed by this module.
-    (Optional) `policies` - A list of IAM policies ARNs to attach to IAM role. Defaults to `["arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole"]`.
-    (Optional) `inline_policies` - Map of inline IAM policies to attach to IAM role. (`name` => `policy`).
+      `LOG` - Ignore the change and don't update the table in the data catalog.
+      `UPDATE_IN_DATABASE` - Update the table definition in the data catalog.
   EOF
   type = object({
-    enabled = optional(bool, true)
-    conditions = optional(list(object({
-      key       = string
-      condition = string
-      values    = list(string)
-    })), [])
-    policies        = optional(list(string), ["arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole"])
+    delete_behavior = optional(string, "DEPRECATE_IN_DATABASE")
+    update_behavior = optional(string, "UPDATE_IN_DATABASE")
+  })
+  default  = {}
+  nullable = false
+
+  validation {
+    condition     = contains(["LOG", "DELETE_FROM_DATABASE", "DEPRECATE_IN_DATABASE"], var.schema_change_policy.delete_behavior)
+    error_message = "Valid values for `schema_change_policy.delete_behavior` are `LOG`, `DELETE_FROM_DATABASE`, `DEPRECATE_IN_DATABASE`."
+  }
+  validation {
+    condition     = contains(["LOG", "UPDATE_IN_DATABASE"], var.schema_change_policy.update_behavior)
+    error_message = "Valid values for `schema_change_policy.update_behavior` are `LOG`, `UPDATE_IN_DATABASE`."
+  }
+}
+
+variable "default_service_role" {
+  description = <<EOF
+  (Optional) A configuration for the default service role used by the crawler to access other resources. Use `service_role` if `default_service_role.enabled` is `false`. `default_service_role` as defined below.
+    (Optional) `enabled` - Whether to create the default service role. Defaults to `true`.
+    (Optional) `name` - The name of the default service role. Defaults to `glue-crawler-$${var.name}`.
+    (Optional) `path` - The path of the default service role. Defaults to `/`.
+    (Optional) `description` - The description of the default service role.
+    (Optional) `policies` - A list of IAM policy ARNs to attach to the default service role. `AWSGlueServiceRole` is always attached. Defaults to `[]`.
+    (Optional) `inline_policies` - A Map of inline IAM policies to attach to the default service role. (`name` => `policy`).
+  EOF
+  type = object({
+    enabled     = optional(bool, true)
+    name        = optional(string)
+    path        = optional(string, "/")
+    description = optional(string, "Managed by Terraform.")
+
+    policies        = optional(list(string), [])
     inline_policies = optional(map(string), {})
   })
   default  = {}
   nullable = false
+}
+
+variable "service_role" {
+  description = "(Optional) The ARN (Amazon Resource Name) of the IAM Role used by the crawler to access other resources. Only required if `default_service_role.enabled` is `false`."
+  type        = string
+  default     = null
+  nullable    = true
 }
 
 variable "security_configuration" {
@@ -318,9 +343,9 @@ variable "security_configuration" {
   nullable    = false
 }
 
-variable "lake_formation_credentials_configuration" {
+variable "lake_formation_credentials" {
   description = <<EOF
-  (Optional) A configuration of the crawler to use Lake Formation credentials for crawling the data source. `lake_formation_credentials_configuration` as defined below.
+  (Optional) A configuration of the crawler to use Lake Formation credentials for crawling the data source. `lake_formation_credentials` as defined below.
     (Optional) `enabled` - Whether to use Lake Formation credentials for the crawler instead of the IAM role credentials. Defaults to `false`.
     (Optional) `account_id` - A valid AWS account ID for cross account crawls. If the data source is registered in another account, you must provide the registered account ID. Otherwise, the crawler will crawl only those data sources associated to the account.
   EOF
@@ -350,9 +375,6 @@ variable "module_tags_enabled" {
 ###################################################
 # Resource Group
 ###################################################
-
-
-
 
 variable "resource_group" {
   description = <<EOF
