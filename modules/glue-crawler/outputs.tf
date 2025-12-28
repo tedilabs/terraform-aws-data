@@ -180,7 +180,7 @@ output "resource_group" {
 #     for k, v in aws_glue_crawler.this :
 #     k => v
 #     if !contains([
-#       "tags_all", "tags", "name", "database_name", "region", "arn", "id", "table_prefix", "classifiers", "description", "recrawl_policy", "role", "schedule", "schema_change_policy", "security_configuration"
+#       "tags_all", "tags", "name", "database_name", "region", "arn", "id", "table_prefix", "classifiers", "description", "recrawl_policy", "role", "schedule", "schema_change_policy", "security_configuration", "lineage_configuration"
 #     ], k)
 #   }
 # }
