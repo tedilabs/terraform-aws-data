@@ -14,7 +14,7 @@ module "replication_iam_role" {
   count = length(var.replication_rules) > 0 && var.default_replication_iam_role.enabled ? 1 : 0
 
   source  = "tedilabs/account/aws//modules/iam-role"
-  version = "~> 0.32.0"
+  version = "~> 0.33.2"
 
   name = coalesce(
     var.default_replication_iam_role.name,
