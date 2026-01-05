@@ -142,6 +142,44 @@ variable "dynamodb_data_sources" {
   }
 }
 
+variable "hudi_data_sources" {
+  description = <<EOF
+  (Optional) A list of Hudi data sources to be scanned by the crawler. Each item of `hudi_data_sources` as defined below.
+    (Required) `paths` - A list of the Amazon S3 paths that contains Hudi metadata folders as `s3://bucket/prefix`.
+    (Optional) `connection` - The name of the connection to use to connect to the Hudi data source.
+    (Optional) `exclusion_patterns` - A list of glob patterns used to exclude from the crawl.
+    (Optional) `maximum_traversal_depth` - The maximum depth of Amazon S3 paths that the crawler can traverse to discover the Hudi metadata folder in your Amazon S3 path. Valid values are between `1` and `20`.
+  EOF
+  type = list(object({
+    paths      = list(string)
+    connection = optional(string)
+
+    exclusion_patterns      = optional(list(string), [])
+    maximum_traversal_depth = optional(number)
+  }))
+  default  = []
+  nullable = false
+}
+
+variable "iceberg_data_sources" {
+  description = <<EOF
+  (Optional) A list of Iceberg data sources to be scanned by the crawler. Each item of `iceberg_data_sources` as defined below.
+    (Required) `paths` - A list of the Amazon S3 paths that contains Iceberg metadata folders as `s3://bucket/prefix`.
+    (Optional) `connection` - The name of the connection to use to connect to the Iceberg data source.
+    (Optional) `exclusion_patterns` - A list of glob patterns used to exclude from the crawl.
+    (Optional) `maximum_traversal_depth` - The maximum depth of Amazon S3 paths that the crawler can traverse to discover the Iceberg metadata folder in your Amazon S3 path. Valid values are between `1` and `20`.
+  EOF
+  type = list(object({
+    paths      = list(string)
+    connection = optional(string)
+
+    exclusion_patterns      = optional(list(string), [])
+    maximum_traversal_depth = optional(number)
+  }))
+  default  = []
+  nullable = false
+}
+
 variable "jdbc_data_sources" {
   description = <<EOF
   (Optional) A list of JDBC data sources to be scanned by the crawler. Each item of `jdbc_data_sources` as defined below.

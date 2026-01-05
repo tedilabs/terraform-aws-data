@@ -52,6 +52,8 @@ output "data_sources" {
     `catalog` - A list of Glue Data Catalog data sources to be scanned by the crawler.
     `delta_lake` - A list of Delta Lake data sources to be scanned by the crawler.
     `dynamodb` - A list of DynamoDB data sources to be scanned by the crawler.
+    `hudi` - A list of Hudi data sources to be scanned by the crawler.
+    `iceberg` - A list of Iceberg data sources to be scanned by the crawler.
     `jdbc` - A list of JDBC data sources to be scanned by the crawler.
     `mongodb` - A list of MongoDB data sources to be scanned by the crawler.
     `s3` - A list of S3 data sources to be scanned by the crawler.
@@ -84,6 +86,24 @@ output "data_sources" {
 
         scanning_rate         = source.scan_rate
         data_sampling_enabled = source.scan_all
+      }
+    ]
+    hudi = [
+      for source in aws_glue_crawler.this.hudi_target : {
+        paths      = source.paths
+        connection = source.connection_name
+
+        exclusion_patterns      = source.exclusions
+        maximum_traversal_depth = source.maximum_traversal_depth
+      }
+    ]
+    iceberg = [
+      for source in aws_glue_crawler.this.iceberg_target : {
+        paths      = source.paths
+        connection = source.connection_name
+
+        exclusion_patterns      = source.exclusions
+        maximum_traversal_depth = source.maximum_traversal_depth
       }
     ]
     jdbc = [

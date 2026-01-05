@@ -89,6 +89,32 @@ resource "aws_glue_crawler" "this" {
     }
   }
 
+  dynamic "hudi_target" {
+    for_each = var.hudi_data_sources
+    iterator = source
+
+    content {
+      paths           = source.value.paths
+      connection_name = source.value.connection
+
+      exclusions              = source.value.exclusion_patterns
+      maximum_traversal_depth = source.value.maximum_traversal_depth
+    }
+  }
+
+  dynamic "iceberg_target" {
+    for_each = var.iceberg_data_sources
+    iterator = source
+
+    content {
+      paths           = source.value.paths
+      connection_name = source.value.connection
+
+      exclusions              = source.value.exclusion_patterns
+      maximum_traversal_depth = source.value.maximum_traversal_depth
+    }
+  }
+
   dynamic "jdbc_target" {
     for_each = var.jdbc_data_sources
     iterator = source
