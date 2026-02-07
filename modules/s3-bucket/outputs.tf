@@ -133,6 +133,9 @@ output "encryption" {
 output "access_control" {
   description = "The configuration for the S3 bucket access control."
   value = {
+    abac = {
+      enabled = aws_s3_bucket_abac.this.abac_status[0].status == "Enabled"
+    }
     object_ownership = aws_s3_bucket_ownership_controls.this.rule[0].object_ownership
     acl = {
       enabled = aws_s3_bucket_ownership_controls.this.rule[0].object_ownership != "BucketOwnerEnforced"

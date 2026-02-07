@@ -17,6 +17,21 @@ locals {
 
 
 ###################################################
+# ABAC (Attribute-Based Access Control) for S3 Bucket
+###################################################
+
+resource "aws_s3_bucket_abac" "this" {
+  region = var.region
+
+  bucket = aws_s3_bucket.this.bucket
+
+  abac_status {
+    status = var.abac.enabled ? "Enabled" : "Disabled"
+  }
+}
+
+
+###################################################
 # Policy for S3 Bucket
 ###################################################
 

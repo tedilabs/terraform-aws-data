@@ -292,6 +292,18 @@ variable "replication_rules" {
   }
 }
 
+variable "abac" {
+  description = <<EOF
+  (Optional) A configurations of Attribute-Based Access Control (ABAC) for the S3 bucket. `abac` block as defined below.
+    (Optional) `enabled` - Whether to enable ABAC for the S3 bucket. Defaults to `false`.
+  EOF
+  type = object({
+    enabled = optional(bool, false)
+  })
+  default  = {}
+  nullable = false
+}
+
 variable "policy" {
   description = "(Optional) A valid policy JSON document. Although this is a bucket policy, not an IAM policy, the `aws_iam_policy_document` data source may be used, so long as it specifies a principal. Bucket policies are limited to 20 KB in size."
   type        = string

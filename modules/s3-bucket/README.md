@@ -3,6 +3,7 @@
 This module creates following resources.
 
 - `aws_s3_bucket`
+- `aws_s3_bucket_abac`
 - `aws_s3_bucket_accelerate_configuration`
 - `aws_s3_bucket_acl` (optional)
 - `aws_s3_bucket_cors_configuration` (optional)
@@ -23,7 +24,7 @@ This module creates following resources.
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.12 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.22 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.23 |
 
 ## Providers
 
@@ -43,6 +44,7 @@ This module creates following resources.
 | Name | Type |
 |------|------|
 | [aws_s3_bucket.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
+| [aws_s3_bucket_abac.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_abac) | resource |
 | [aws_s3_bucket_accelerate_configuration.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_accelerate_configuration) | resource |
 | [aws_s3_bucket_acl.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_acl) | resource |
 | [aws_s3_bucket_cors_configuration.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_cors_configuration) | resource |
@@ -68,6 +70,7 @@ This module creates following resources.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_name"></a> [name](#input\_name) | (Required) Desired name for the S3 bucket. | `string` | n/a | yes |
+| <a name="input_abac"></a> [abac](#input\_abac) | (Optional) A configurations of Attribute-Based Access Control (ABAC) for the S3 bucket. `abac` block as defined below.<br/>    (Optional) `enabled` - Whether to enable ABAC for the S3 bucket. Defaults to `false`. | <pre>object({<br/>    enabled = optional(bool, false)<br/>  })</pre> | `{}` | no |
 | <a name="input_block_public_access"></a> [block\_public\_access](#input\_block\_public\_access) | (Optional) A configurations of Block Public Access for the S3 bucket.<br/>    (Optional) `enabled` - Whether to block all public access to S3 bucket. Defaults to `true`.<br/>    (Optional) `block_public_acls_enabled` - Block new public ACLs and uploading public objects if true. Always enabled if `block_public_access.enabled` is `true`.<br/>    (Optional) `ignore_public_acls_enabled` - Retroactively remove public access granted through public ACLs. Always enabled if `block_public_access.enabled` is `true`.<br/>    (Optional) `block_public_policy_enabled` - Block new public bucket policies. Always enabled if `block_public_access.enabled` is `true`.<br/>    (Optional) `restrict_public_buckets_enabled` - Retroactivley block public and cross-account access if bucket has public policies. Always enabled if `block_public_access.enabled` is `true`. | <pre>object({<br/>    enabled                         = optional(bool, true)<br/>    block_public_acls_enabled       = optional(bool, false)<br/>    ignore_public_acls_enabled      = optional(bool, false)<br/>    block_public_policy_enabled     = optional(bool, false)<br/>    restrict_public_buckets_enabled = optional(bool, false)<br/>  })</pre> | `{}` | no |
 | <a name="input_cors_rules"></a> [cors\_rules](#input\_cors\_rules) | (Optional) A list of CORS (Cross-Origin Resource Sharing) rules for the bucket. You can configure up to 100 rules. Each value of `cors_rules` as defined below.<br/>    (Optional) `id` - Unique identifier for the rule. The value cannot be longer than 255 characters.<br/>    (Optional) `allowed_headers` - Set of Headers that are specified in the `Access-Control-Request-Headers` header.<br/>    (Required) `allowed_methods` - Set of HTTP methods that you allow the origin to execute. Valid values are `GET`, `PUT`, `HEAD`, `POST`, and `DELETE`.<br/>    (Required) `allowed_origins` - Set of origins you want customers to be able to access the bucket from.<br/>    (Optional) `expose_headers` - Set of headers in the response that you want customers to be able to access from their applications.<br/>    (Optional) `max_age` - The time in seconds that your browser is to cache the preflight response for the specified resource. | <pre>list(object({<br/>    id              = optional(string)<br/>    allowed_headers = optional(set(string), [])<br/>    allowed_methods = set(string)<br/>    allowed_origins = set(string)<br/>    expose_headers  = optional(set(string), [])<br/>    max_age         = optional(number)<br/>  }))</pre> | `[]` | no |
 | <a name="input_default_replication_iam_role"></a> [default\_replication\_iam\_role](#input\_default\_replication\_iam\_role) | (Optional) A configuration for the default IAM role for the S3 bucket replication. Use `replication_iam_role` if `default_replication_iam_role.enabled` is `false`. `default_replication_iam_role` as defined below.<br/>    (Optional) `enabled` - Whether to create the default replication IAM role. Defaults to `true`.<br/>    (Optional) `name` - The name of the default replication IAM role. Defaults to `s3-${var.name}-replication`.<br/>    (Optional) `path` - The path of the default replication IAM role. Defaults to `/`.<br/>    (Optional) `description` - The description of the default replication IAM role.<br/>    (Optional) `policies` - A list of IAM policy ARNs to attach to the default replication IAM role. Defaults to `[]`.<br/>    (Optional) `inline_policies` - A Map of inline IAM policies to attach to the default replication IAM role. (`name` => `policy`). | <pre>object({<br/>    enabled     = optional(bool, true)<br/>    name        = optional(string)<br/>    path        = optional(string, "/")<br/>    description = optional(string, "Managed by Terraform.")<br/><br/>    policies        = optional(list(string), [])<br/>    inline_policies = optional(map(string), {})<br/>  })</pre> | `{}` | no |
