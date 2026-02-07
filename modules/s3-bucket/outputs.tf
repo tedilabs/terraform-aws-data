@@ -123,9 +123,10 @@ output "replication" {
 output "encryption" {
   description = "The configuration for the S3 bucket Server-Side Encryption."
   value = {
-    type               = var.encryption.type
-    kms_key            = try(one(aws_s3_bucket_server_side_encryption_configuration.this.rule[*]).apply_server_side_encryption_by_default[0].kms_master_key_id, null)
-    bucket_key_enabled = one(aws_s3_bucket_server_side_encryption_configuration.this.rule[*]).bucket_key_enabled
+    type                     = var.encryption.type
+    kms_key                  = try(one(aws_s3_bucket_server_side_encryption_configuration.this.rule[*]).apply_server_side_encryption_by_default[0].kms_master_key_id, null)
+    blocked_encryption_types = one(aws_s3_bucket_server_side_encryption_configuration.this.rule[*]).blocked_encryption_types
+    bucket_key_enabled       = one(aws_s3_bucket_server_side_encryption_configuration.this.rule[*]).bucket_key_enabled
   }
 }
 

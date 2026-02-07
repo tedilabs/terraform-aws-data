@@ -23,12 +23,16 @@ variable "encryption" {
   (Optional) A configurations of Server-Side Encryption for the S3 bucket.
     (Optional) `type` - The server-side encryption algorithm to use. Valid values are `AES256` and `AWS_KMS`. Defaults to `AES256`.
     (Optional) `kms_key` - The AWS KMS key ID used for the `SSE-KMS` encryption. This can only be used when you set the value of `encryption.type` as `AWS_KMS` or `AWS_KMS_DSSE`. The default `aws/s3` AWS KMS key is used if this element is absent while the `encryption.type` is `AWS_KMS` or `AWS_KMS_DSSE`.
+    (Optional) `blocked_encryption_types` - A set of server-side encryption types to block for object uploads. Valid values are `SSE-C` and `NONE`.
+      `SSE-C` - Blocks uploads that use server-side encryption with customer-provided keys.
+      `NONE` - Unblocks all encryption types.
     (Optional) `bucket_key_enabled` - Whether or not to use Amazon S3 Bucket Keys for SSE-KMS. Defaults to `true`.
   EOF
   type = object({
-    type               = optional(string, "AES256")
-    kms_key            = optional(string)
-    bucket_key_enabled = optional(bool, true)
+    type                     = optional(string, "AES256")
+    kms_key                  = optional(string)
+    blocked_encryption_types = optional(set(string), ["SSE-C"])
+    bucket_key_enabled       = optional(bool, true)
   })
   default  = {}
   nullable = false
@@ -36,6 +40,13 @@ variable "encryption" {
   validation {
     condition     = contains(["AES256", "AWS_KMS", "AWS_KMS_DSSE"], var.encryption.type)
     error_message = "Valid values for `encryption.type` are `AES256`, `AWS_KMS`, `AWS_KMS_DSSE`."
+  }
+  validation {
+    condition = alltrue([
+      for encryption_type in var.encryption.blocked_encryption_types :
+      contains(["SSE-C", "NONE"], encryption_type)
+    ])
+    error_message = "Valid values for `encryption.blocked_encryption_types` are `SSE-C` and `NONE`."
   }
 }
 

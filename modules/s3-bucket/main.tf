@@ -77,7 +77,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
   bucket = aws_s3_bucket.this.bucket
 
   rule {
-    bucket_key_enabled = var.encryption.bucket_key_enabled
+    blocked_encryption_types = var.encryption.blocked_encryption_types
+    bucket_key_enabled       = var.encryption.bucket_key_enabled
 
     apply_server_side_encryption_by_default {
       sse_algorithm     = local.encryption_type[var.encryption.type]
