@@ -19,7 +19,6 @@ locals {
 # Glue Table
 ###################################################
 
-
 # - owner
 # - parameters
 # - partition_index
@@ -52,9 +51,13 @@ locals {
 # - view_expanded_text
 # - view_original_text
 resource "aws_glue_catalog_table" "this" {
+  region = var.region
+
   catalog_id    = var.catalog
   database_name = var.database
+  owner         = var.owner
 
   name        = var.name
   description = var.description
+  table_type  = var.type
 }

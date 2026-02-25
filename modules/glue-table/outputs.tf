@@ -1,3 +1,8 @@
+output "region" {
+  description = "The AWS region this module resources resides in."
+  value       = aws_glue_catalog_table.this.region
+}
+
 output "arn" {
   description = "The Amazon Resource Name (ARN) of the Glue Catalog Table."
   value       = aws_glue_catalog_table.this.arn
@@ -18,6 +23,11 @@ output "database" {
   value       = aws_glue_catalog_table.this.database_name
 }
 
+output "owner" {
+  description = "The table owner."
+  value       = aws_glue_catalog_table.this.owner
+}
+
 output "name" {
   description = "The name of the table."
   value       = aws_glue_catalog_table.this.name
@@ -28,13 +38,10 @@ output "description" {
   value       = aws_glue_catalog_table.this.description
 }
 
-# output "z" {
-#   value       = {
-#     for k, v in aws_glue_catalog_table.this :
-#     k => v
-#     if !contains(["name", "description", "catalog_id", "database_name", "arn", "id", "tags", "tags_all"], k)
-#   }
-# }
+output "type" {
+  description = "The type of the table."
+  value       = aws_glue_catalog_table.this.table_type
+}
 
 output "sharing" {
   description = <<EOF
