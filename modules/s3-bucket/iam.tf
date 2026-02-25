@@ -64,6 +64,8 @@ module "replication_iam_role" {
     ))
   }, var.default_replication_iam_role.inline_policies)
 
+  permissions_boundary = var.default_replication_iam_role.permissions_boundary
+
   force_detach_policies = true
   resource_group = {
     enabled = false
