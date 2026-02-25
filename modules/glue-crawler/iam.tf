@@ -52,6 +52,8 @@ module "role" {
     var.default_service_role.inline_policies
   )
 
+  permissions_boundary = var.default_service_role.permissions_boundary
+
   force_detach_policies = true
   resource_group = {
     enabled = false

@@ -143,18 +143,20 @@ variable "iam_identity_center" {
       (Optional) `description` - The description of the IAM Role. Defaults to `Managed by Terraform.`.
       (Optional) `policies` - A list of IAM Policy ARNs to attach to the IAM Role. Defaults to an empty list.
       (Optional) `inline_policies` - A map of names to inline policy documents to attach to the IAM Role. Defaults to an empty map.
+      (Optional) `permissions_boundary` - The ARN of the IAM policy to use as permissions boundary for the default IAM Role.
     (Optional) `service_role` - The Amazon Resource Name (ARN) of the IAM Role to be used by workgroup members authenticated via IAM Identity Center. Only required if `default_service_role.enabled` is `false`.
   EOF
   type = object({
     enabled  = optional(bool, false)
     instance = optional(string)
     default_service_role = optional(object({
-      enabled         = optional(bool, true)
-      name            = optional(string)
-      path            = optional(string, "/")
-      description     = optional(string, "Managed by Terraform.")
-      policies        = optional(list(string), [])
-      inline_policies = optional(map(string), {})
+      enabled              = optional(bool, true)
+      name                 = optional(string)
+      path                 = optional(string, "/")
+      description          = optional(string, "Managed by Terraform.")
+      policies             = optional(list(string), [])
+      inline_policies      = optional(map(string), {})
+      permissions_boundary = optional(string)
     }), {})
     service_role = optional(string)
   })

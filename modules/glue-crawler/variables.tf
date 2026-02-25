@@ -183,7 +183,7 @@ variable "iceberg_data_sources" {
 variable "jdbc_data_sources" {
   description = <<EOF
   (Optional) A list of JDBC data sources to be scanned by the crawler. Each item of `jdbc_data_sources` as defined below.
-    (Required) `path` - The path of the JDBC data source. Use `<database>/<schema>/<table>` or `<database>/<table>` format, depending on the database product. Oracle Database and MySQL don’t support schema in the path. You can substitute the percent `%` character for `<schema>` or `<table>`. For example, for an Oracle database with a system identifier (SID) of orcl, enter `orcl/%` to import all tables to which the user named in the connection has access.
+    (Required) `path` - The path of the JDBC data source. Use `<database>/<schema>/<table>` or `<database>/<table>` format, depending on the database product. Oracle Database and MySQL don't support schema in the path. You can substitute the percent `%` character for `<schema>` or `<table>`. For example, for an Oracle database with a system identifier (SID) of orcl, enter `orcl/%` to import all tables to which the user named in the connection has access.
     (Optional) `connection` - The name of the connection to use to connect to the JDBC data source.
     (Optional) `exclusion_patterns` - A list of glob patterns used to exclude from the crawl.
     (Optional) `additional_metadata_properties` - A set of additional metadata properties for the crawler to crawl. Valid values are `RAWTYPES` and `COMMENTS` to enable additional metadata in table responses.
@@ -353,6 +353,7 @@ variable "default_service_role" {
     (Optional) `description` - The description of the default service role.
     (Optional) `policies` - A list of IAM policy ARNs to attach to the default service role. `AWSGlueServiceRole` is always attached. Defaults to `[]`.
     (Optional) `inline_policies` - A Map of inline IAM policies to attach to the default service role. (`name` => `policy`).
+    (Optional) `permissions_boundary` - The ARN of the IAM policy to use as permissions boundary for the default service role.
   EOF
   type = object({
     enabled     = optional(bool, true)
@@ -360,8 +361,9 @@ variable "default_service_role" {
     path        = optional(string, "/")
     description = optional(string, "Managed by Terraform.")
 
-    policies        = optional(list(string), [])
-    inline_policies = optional(map(string), {})
+    policies             = optional(list(string), [])
+    inline_policies      = optional(map(string), {})
+    permissions_boundary = optional(string)
   })
   default  = {}
   nullable = false

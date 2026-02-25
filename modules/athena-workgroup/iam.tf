@@ -45,6 +45,8 @@ module "role__iam_identity_center" {
     var.iam_identity_center.default_service_role.inline_policies
   )
 
+  permissions_boundary = var.iam_identity_center.default_service_role.permissions_boundary
+
   force_detach_policies = true
   resource_group = {
     enabled = false
