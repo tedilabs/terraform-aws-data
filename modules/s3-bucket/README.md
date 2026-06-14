@@ -22,27 +22,27 @@ This module creates following resources.
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.12 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.23 |
 
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_aws"></a> [aws](#provider\_aws) | 6.31.0 |
 
 ## Modules
 
 | Name | Source | Version |
-|------|--------|---------|
+| ---- | ------ | ------- |
 | <a name="module_replication_iam_role"></a> [replication\_iam\_role](#module\_replication\_iam\_role) | tedilabs/account/aws//modules/iam-role | ~> 0.32.0 |
 | <a name="module_resource_group"></a> [resource\_group](#module\_resource\_group) | tedilabs/misc/aws//modules/resource-group | ~> 0.12.0 |
 
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [aws_s3_bucket.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
 | [aws_s3_bucket_abac.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_abac) | resource |
 | [aws_s3_bucket_accelerate_configuration.this](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_accelerate_configuration) | resource |
@@ -68,7 +68,7 @@ This module creates following resources.
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_name"></a> [name](#input\_name) | (Required) Desired name for the S3 bucket. | `string` | n/a | yes |
 | <a name="input_abac"></a> [abac](#input\_abac) | (Optional) A configurations of Attribute-Based Access Control (ABAC) for the S3 bucket. `abac` block as defined below.<br/>    (Optional) `enabled` - Whether to enable ABAC for the S3 bucket. Defaults to `false`. | <pre>object({<br/>    enabled = optional(bool, false)<br/>  })</pre> | `{}` | no |
 | <a name="input_block_public_access"></a> [block\_public\_access](#input\_block\_public\_access) | (Optional) A configurations of Block Public Access for the S3 bucket.<br/>    (Optional) `enabled` - Whether to block all public access to S3 bucket. Defaults to `true`.<br/>    (Optional) `block_public_acls_enabled` - Block new public ACLs and uploading public objects if true. Always enabled if `block_public_access.enabled` is `true`.<br/>    (Optional) `ignore_public_acls_enabled` - Retroactively remove public access granted through public ACLs. Always enabled if `block_public_access.enabled` is `true`.<br/>    (Optional) `block_public_policy_enabled` - Block new public bucket policies. Always enabled if `block_public_access.enabled` is `true`.<br/>    (Optional) `restrict_public_buckets_enabled` - Retroactivley block public and cross-account access if bucket has public policies. Always enabled if `block_public_access.enabled` is `true`. | <pre>object({<br/>    enabled                         = optional(bool, true)<br/>    block_public_acls_enabled       = optional(bool, false)<br/>    ignore_public_acls_enabled      = optional(bool, false)<br/>    block_public_policy_enabled     = optional(bool, false)<br/>    restrict_public_buckets_enabled = optional(bool, false)<br/>  })</pre> | `{}` | no |
@@ -81,7 +81,7 @@ This module creates following resources.
 | <a name="input_lifecycle_transition_default_min_object_size_strategy"></a> [lifecycle\_transition\_default\_min\_object\_size\_strategy](#input\_lifecycle\_transition\_default\_min\_object\_size\_strategy) | (Optional) The default minimum object size (in bytes) to which the lifecycle transition rule applies. This is used when a lifecycle rule does not specify `min_object_size`. Valid values are `all_storage_classes_128K` and `varies_by_storage_class`. Custom filters always take precedence over the default transition behavior. Defaults to `all_storage_classes_128K`. | `string` | `"all_storage_classes_128K"` | no |
 | <a name="input_logging"></a> [logging](#input\_logging) | (Optional) A configurations of Server Access Logging for the S3 bucket.<br/>    (Optional) `enabled` - Whether to enable S3 bucket logging for the access log. Defaults to `false`.<br/>    (Optional) `s3_bucket` - The name of the bucket to deliver logs to.<br/>    (Optional) `s3_key_prefix` - The key prefix to append to log objects.<br/>    (Optional) `s3_key_format` - The key format to use for log object keys. Valid values are `SIMPLE`, `PARTITIONED_BY_DELIVERY_TIME` and `PARTITIONED_BY_EVENT_TIME`. Defaults to `SIMPLE`.<br/>      `SIMPLE` - The key is in the format `[s3_key_prefix][YYYY]-[MM]-[DD]-[hh]-[mm]-[ss]-[UniqueString]`.<br/>      `PARTITIONED_BY_DELIVERY_TIME` - The key is in the format `[s3_key_prefix][SourceAccountId]/[SourceRegion]/[SourceBucket]/[YYYY]/[MM]/[DD]/[YYYY]-[MM]-[DD]-[hh]-[mm]-[ss]-[UniqueString]`. The time in the log file names corresponds to the delivery time for the log files.<br/>      `PARTITIONED_BY_EVENT_TIME` - The key is in the format `[s3_key_prefix][SourceAccountId]/[SourceRegion]/[SourceBucket]/[YYYY]/[MM]/[DD]/[YYYY]-[MM]-[DD]-[hh]-[mm]-[ss]-[UniqueString]`. The year, month, and day correspond to the day on which the event occurred, and the hour, minutes and seconds are set to 00 in the key.<br/>    (Optional) `is_target_bucket` - Whether this bucket is the target bucket for Server Access Logging.<br/>    (Optional) `allowed_source_buckets` - A list of names of S3 buckets allowed to write logs to this target bucket. Each source bucket should be owned by same AWS account ID with target bucket. Only used if `is_target_bucket` is `true`. | <pre>object({<br/>    enabled       = optional(bool, false)<br/>    s3_bucket     = optional(string)<br/>    s3_key_prefix = optional(string)<br/>    s3_key_format = optional(string, "SIMPLE")<br/><br/>    is_target_bucket       = optional(bool, false)<br/>    allowed_source_buckets = optional(list(string), [])<br/>  })</pre> | `{}` | no |
 | <a name="input_module_tags_enabled"></a> [module\_tags\_enabled](#input\_module\_tags\_enabled) | (Optional) Whether to create AWS Resource Tags for the module informations. | `bool` | `true` | no |
-| <a name="input_object_lock"></a> [object\_lock](#input\_object\_lock) | (Optional) A configurations of Object Lock for the S3 bucket.<br/>    (Optional) `enabled` - Whether to use an accelerated endpoint for faster data transfers. Defaults to `false`.<br/>    (Optional) `default_retention` - Specify the default Object Lock retention settings for new objects placed in the bucket. `default_retention` block as defined below.<br/>      (Required) `mode` - The default Object Lock retention mode you want to apply to new objects placed in the specified bucket. Valid values are `COMPLIANCE`, `GOVERNANCE`. Defaults to `GOVERNANCE`.<br/>      (Optional) `unit` - The default Object Lock retention unit. Valid values are `DAYS`, `YEARS`. Defaults to `DAYS`.<br/>      (Optional) `value` - The default Object Lock retention value. | <pre>object({<br/>    enabled = optional(bool, false)<br/>    default_retention = optional(object({<br/>      mode  = optional(string, "GOVERNANCE")<br/>      unit  = optional(string, "DAYS")<br/>      value = optional(number)<br/>    }))<br/>  })</pre> | `{}` | no |
+| <a name="input_object_lock"></a> [object\_lock](#input\_object\_lock) | (Optional) A configurations of Object Lock for the S3 bucket.<br/>    (Optional) `enabled` - Whether to enable Object Lock for the S3 bucket. Defaults to `false`.<br/>    (Optional) `default_retention` - Specify the default Object Lock retention settings for new objects placed in the bucket. `default_retention` block as defined below.<br/>      (Required) `mode` - The default Object Lock retention mode you want to apply to new objects placed in the specified bucket. Valid values are `COMPLIANCE`, `GOVERNANCE`. Defaults to `GOVERNANCE`.<br/>      (Optional) `unit` - The default Object Lock retention unit. Valid values are `DAYS`, `YEARS`. Defaults to `DAYS`.<br/>      (Optional) `value` - The default Object Lock retention value. | <pre>object({<br/>    enabled = optional(bool, false)<br/>    default_retention = optional(object({<br/>      mode  = optional(string, "GOVERNANCE")<br/>      unit  = optional(string, "DAYS")<br/>      value = optional(number)<br/>    }))<br/>  })</pre> | `{}` | no |
 | <a name="input_object_ownership"></a> [object\_ownership](#input\_object\_ownership) | (Optional) Control ownership of objects written to this bucket from other AWS accounts and granted using access control lists (ACLs). Object ownership determines who can specify access to objects. Valid values: `BucketOwnerPreferred`, `BucketOwnerEnforced` or `ObjectWriter`.<br/>  - `BucketOwnerPreferred`: Objects uploaded to the bucket change ownership to the bucket owner if the objects are uploaded with the `bucket-owner-full-control` canned ACL.<br/>  - `ObjectWriter`: The uploading account will own the object if the object is uploaded with the `bucket-owner-full-control` canned ACL.<br/>  - `BucketOwnerEnforced`: The bucket owner automatically owns and has full control over every object in the bucket. ACLs no longer affect permissions to data in the S3 bucket. | `string` | `"BucketOwnerEnforced"` | no |
 | <a name="input_policy"></a> [policy](#input\_policy) | (Optional) A valid policy JSON document. Although this is a bucket policy, not an IAM policy, the `aws_iam_policy_document` data source may be used, so long as it specifies a principal. Bucket policies are limited to 20 KB in size. | `string` | `null` | no |
 | <a name="input_region"></a> [region](#input\_region) | (Optional) The region in which to create the module resources. If not provided, the module resources will be created in the provider's configured region. | `string` | `null` | no |
@@ -99,7 +99,7 @@ This module creates following resources.
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_access_control"></a> [access\_control](#output\_access\_control) | The configuration for the S3 bucket access control. |
 | <a name="output_arn"></a> [arn](#output\_arn) | The ARN of the bucket. |
 | <a name="output_domain_name"></a> [domain\_name](#output\_domain\_name) | The bucket domain name. Will be of format `bucketname.s3.amazonaws.com`. |

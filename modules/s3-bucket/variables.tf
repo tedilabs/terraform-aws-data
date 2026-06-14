@@ -82,7 +82,7 @@ variable "versioning" {
 variable "object_lock" {
   description = <<EOF
   (Optional) A configurations of Object Lock for the S3 bucket.
-    (Optional) `enabled` - Whether to use an accelerated endpoint for faster data transfers. Defaults to `false`.
+    (Optional) `enabled` - Whether to enable Object Lock for the S3 bucket. Defaults to `false`.
     (Optional) `default_retention` - Specify the default Object Lock retention settings for new objects placed in the bucket. `default_retention` block as defined below.
       (Required) `mode` - The default Object Lock retention mode you want to apply to new objects placed in the specified bucket. Valid values are `COMPLIANCE`, `GOVERNANCE`. Defaults to `GOVERNANCE`.
       (Optional) `unit` - The default Object Lock retention unit. Valid values are `DAYS`, `YEARS`. Defaults to `DAYS`.
