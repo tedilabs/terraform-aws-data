@@ -15,6 +15,7 @@ Terraform module which creates data related resources on AWS.
 - [glue-table](./modules/glue-table)
 - [s3-access-point](./modules/s3-access-point)
 - [s3-bucket](./modules/s3-bucket)
+- [s3-objects](./modules/s3-objects)
 
 
 ## Target AWS Services
@@ -36,6 +37,7 @@ Terraform Modules from [this package](https://github.com/tedilabs/terraform-aws-
 - **AWS S3**
   - S3 Bucket
   - S3 Access Point
+  - S3 Object
 
 
 ## Examples
@@ -55,6 +57,7 @@ Terraform Modules from [this package](https://github.com/tedilabs/terraform-aws-
 - [S3 Bucket with Access Logging](./examples/s3-bucket-access-logging)
 - [S3 Bucket with Server-Side Encryption](./examples/s3-bucket-encryption)
 - [S3 Bucket with Lifecycle Rules](./examples/s3-bucket-lifecycle-rules)
+- [S3 Bucket with Objects](./examples/s3-bucket-objects)
 - [S3 Bucket with Versioning](./examples/s3-bucket-versioning)
 
 ### S3 Access Point
