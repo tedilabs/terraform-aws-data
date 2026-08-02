@@ -41,8 +41,7 @@ locals {
         website_redirect    = null
         metadata            = directory.metadata
 
-        force_destroy = directory.force_destroy
-        tags          = directory.tags
+        tags = directory.tags
       }
     ]
   ])
@@ -64,6 +63,11 @@ locals {
 ###################################################
 
 locals {
+  encryption_type = {
+    "AES256"       = "AES256"
+    "AWS_KMS"      = "aws:kms"
+    "AWS_KMS_DSSE" = "aws:kms:dsse"
+  }
   mime_types = {
     "css"   = "text/css"
     "csv"   = "text/csv"
@@ -103,15 +107,9 @@ locals {
 
 # INFO: Not supported attributes
 # - `acl`
-# - `checksum_algorithm`
 # - `content_base64`
 # - `etag`
 # - `expected_bucket_owner`
-# - `kms_key_id`
-# - `object_lock_legal_hold_status`
-# - `object_lock_mode`
-# - `object_lock_retain_until_date`
-# - `server_side_encryption`
 resource "aws_s3_object" "this" {
   for_each = local.objects
 
@@ -120,9 +118,33 @@ resource "aws_s3_object" "this" {
   bucket = var.bucket
   key    = each.key
 
+  force_destroy = var.force_destroy
+
   source      = each.value.source
-  content     = each.value.content
   source_hash = each.value.source != null ? filemd5(each.value.source) : null
+  content     = each.value.content
+
+  checksum_algorithm = var.checksum.enabled ? var.checksum.algorithm : null
+
+  server_side_encryption = (var.encryption.type != null
+    ? local.encryption_type[var.encryption.type]
+    : null
+  )
+  kms_key_id         = var.encryption.kms_key
+  bucket_key_enabled = var.encryption.bucket_key_enabled
+
+  object_lock_legal_hold_status = (var.object_lock.legal_hold_enabled != null
+    ? (var.object_lock.legal_hold_enabled ? "ON" : "OFF")
+    : null
+  )
+  object_lock_mode = (var.object_lock.retention != null
+    ? var.object_lock.retention.mode
+    : null
+  )
+  object_lock_retain_until_date = (var.object_lock.retention != null
+    ? var.object_lock.retention.retain_until_date
+    : null
+  )
 
   content_type = coalesce(
     each.value.content_type,
@@ -135,9 +157,10 @@ resource "aws_s3_object" "this" {
   content_encoding    = each.value.content_encoding
   content_language    = each.value.content_language
   website_redirect    = each.value.website_redirect
-  metadata            = each.value.metadata
-
-  force_destroy = each.value.force_destroy
+  metadata = merge(
+    var.metadata,
+    each.value.metadata,
+  )
 
   tags = merge(
     {
@@ -147,4 +170,15 @@ resource "aws_s3_object" "this" {
     var.tags,
     each.value.tags,
   )
+
+  # INFO: S3 objects support a maximum of 10 tags
+  dynamic "override_provider" {
+    for_each = var.provider_default_tags_enabled ? [] : ["ignore"]
+
+    content {
+      default_tags {
+        tags = {}
+      }
+    }
+  }
 }
