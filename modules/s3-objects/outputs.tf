@@ -1,6 +1,6 @@
 output "region" {
   description = "The AWS region this module resources resides in."
-  value       = var.region
+  value       = data.aws_region.this.region
 }
 
 output "name" {
@@ -26,6 +26,10 @@ output "objects" {
       content_type  = object.content_type
       storage_class = object.storage_class
       source        = local.objects[key].source
+      website_redirect = (object.website_redirect != ""
+        ? object.website_redirect
+        : null
+      )
       checksum = {
         enabled   = var.checksum.enabled
         algorithm = var.checksum.algorithm
@@ -90,7 +94,7 @@ output "resource_group" {
 #     key => {
 #       for k, v in object :
 #       k => v
-#       if !contains(["key", "arn", "etag", "version_id", "content_type", "storage_class", "bucket", "id", "tags", "tags_all", "region", "override_provider", "force_destroy", "content", "content_base64", "checksum_algorithm", "checksum_sha1", "checksum_sha256", "checksum_crc32", "checksum_crc32c", "checksum_crc64nvme", "bucket_key_enabled", "kms_key_id", "server_side_encryption", "object_lock_mode", "object_lock_retain_until_date", "object_lock_legal_hold_status", "metadata", "source", "source_hash", "acl"], k)
+#       if !contains(["key", "arn", "etag", "version_id", "content_type", "storage_class", "bucket", "id", "tags", "tags_all", "region", "override_provider", "force_destroy", "content", "content_base64", "checksum_algorithm", "checksum_sha1", "checksum_sha256", "checksum_crc32", "checksum_crc32c", "checksum_crc64nvme", "bucket_key_enabled", "kms_key_id", "server_side_encryption", "object_lock_mode", "object_lock_retain_until_date", "object_lock_legal_hold_status", "metadata", "source", "source_hash", "acl", "cache_control", "content_disposition", "content_encoding", "content_language", "website_redirect", "acl"], k)
 #     }
 #   }
 # }

@@ -14,6 +14,10 @@ locals {
   } : {}
 }
 
+data "aws_region" "this" {
+  region = var.region
+}
+
 locals {
   directory_files = flatten([
     for directory in var.directories : [
@@ -31,13 +35,13 @@ locals {
 
         source       = "${directory.path}/${file}"
         content      = null
-        content_type = null
+        content_type = directory.content_type
 
         storage_class       = directory.storage_class
         cache_control       = directory.cache_control
-        content_disposition = null
-        content_encoding    = null
-        content_language    = null
+        content_disposition = directory.content_disposition
+        content_encoding    = directory.content_encoding
+        content_language    = directory.content_language
         website_redirect    = null
         metadata            = directory.metadata
 
@@ -109,23 +113,27 @@ locals {
 # - `acl`
 # - `content_base64`
 # - `etag`
-# - `expected_bucket_owner`
 resource "aws_s3_object" "this" {
   for_each = local.objects
 
-  region = var.region
+  region = data.aws_region.this.region
 
   bucket = var.bucket
   key    = each.key
 
+  storage_class = each.value.storage_class
   force_destroy = var.force_destroy
 
+
+  ## Content
   source      = each.value.source
   source_hash = each.value.source != null ? filemd5(each.value.source) : null
   content     = each.value.content
 
   checksum_algorithm = var.checksum.enabled ? var.checksum.algorithm : null
 
+
+  ## Encryption
   server_side_encryption = (var.encryption.type != null
     ? local.encryption_type[var.encryption.type]
     : null
@@ -133,6 +141,8 @@ resource "aws_s3_object" "this" {
   kms_key_id         = var.encryption.kms_key
   bucket_key_enabled = var.encryption.bucket_key_enabled
 
+
+  ## Object Lock
   object_lock_legal_hold_status = (var.object_lock.legal_hold_enabled != null
     ? (var.object_lock.legal_hold_enabled ? "ON" : "OFF")
     : null
@@ -146,12 +156,12 @@ resource "aws_s3_object" "this" {
     : null
   )
 
+
+  ## Metadata
   content_type = coalesce(
     each.value.content_type,
     try(local.mime_types[lower(regex("\\.([[:alnum:]]+)$", each.value.key)[0])], "application/octet-stream"),
   )
-
-  storage_class       = each.value.storage_class
   cache_control       = each.value.cache_control
   content_disposition = each.value.content_disposition
   content_encoding    = each.value.content_encoding
@@ -162,14 +172,6 @@ resource "aws_s3_object" "this" {
     each.value.metadata,
   )
 
-  tags = merge(
-    {
-      "Name" = "${var.bucket}/${each.key}"
-    },
-    local.module_tags,
-    var.tags,
-    each.value.tags,
-  )
 
   # INFO: S3 objects support a maximum of 10 tags
   dynamic "override_provider" {
@@ -181,4 +183,13 @@ resource "aws_s3_object" "this" {
       }
     }
   }
+
+  tags = merge(
+    {
+      "Name" = "${var.bucket}/${each.key}"
+    },
+    local.module_tags,
+    var.tags,
+    each.value.tags,
+  )
 }

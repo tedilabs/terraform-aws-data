@@ -115,7 +115,7 @@ variable "files" {
     (Optional) `source` - The path to a local file that will be uploaded as the object content. Exactly one of `source` or `content` must be provided. The object is automatically re-uploaded when the content of the file changes.
     (Optional) `content` - The literal string value to use as the object content. Exactly one of `source` or `content` must be provided.
     (Optional) `content_type` - The standard MIME type of the object content. If not provided, the content type is inferred from the file extension of `key`. Defaults to `application/octet-stream` if the extension is unknown.
-    (Optional) `storage_class` - The storage class of the object. Valid values are `STANDARD`, `REDUCED_REDUNDANCY`, `STANDARD_IA`, `ONEZONE_IA`, `INTELLIGENT_TIERING`, `GLACIER`, `DEEP_ARCHIVE`, `GLACIER_IR` and `EXPRESS_ONEZONE`. Defaults to `STANDARD`.
+    (Optional) `storage_class` - The storage class of the object. Valid values are `STANDARD`, `REDUCED_REDUNDANCY`, `STANDARD_IA`, `ONEZONE_IA`, `INTELLIGENT_TIERING`, `GLACIER`, `DEEP_ARCHIVE`, `GLACIER_IR` and `EXPRESS_ONEZONE`. If not provided, the object is created as `STANDARD`, and the storage class transitioned afterward by the bucket lifecycle rules is kept as is. Explicitly providing a value reverts the transitioned storage class back on the next apply by re-uploading the object.
     (Optional) `cache_control` - The caching behavior along the request/reply chain. Read [w3c cache_control](http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.9) for further details.
     (Optional) `content_disposition` - The presentational information for the object. Read [w3c content_disposition](http://www.w3.org/Protocols/rfc2616/rfc2616-sec19.html#sec19.5.1) for further details.
     (Optional) `content_encoding` - The content encodings that have been applied to the object and thus what decoding mechanisms must be applied to obtain the media-type referenced by the `content_type`.
@@ -131,7 +131,7 @@ variable "files" {
     content      = optional(string)
     content_type = optional(string)
 
-    storage_class       = optional(string, "STANDARD")
+    storage_class       = optional(string)
     cache_control       = optional(string)
     content_disposition = optional(string)
     content_encoding    = optional(string)
@@ -165,7 +165,10 @@ variable "files" {
   validation {
     condition = alltrue([
       for file in var.files :
-      contains(["STANDARD", "REDUCED_REDUNDANCY", "STANDARD_IA", "ONEZONE_IA", "INTELLIGENT_TIERING", "GLACIER", "DEEP_ARCHIVE", "GLACIER_IR", "EXPRESS_ONEZONE"], file.storage_class)
+      (file.storage_class == null
+        ? true
+        : contains(["STANDARD", "REDUCED_REDUNDANCY", "STANDARD_IA", "ONEZONE_IA", "INTELLIGENT_TIERING", "GLACIER", "DEEP_ARCHIVE", "GLACIER_IR", "EXPRESS_ONEZONE"], file.storage_class)
+      )
     ])
     error_message = "Valid values for `storage_class` are `STANDARD`, `REDUCED_REDUNDANCY`, `STANDARD_IA`, `ONEZONE_IA`, `INTELLIGENT_TIERING`, `GLACIER`, `DEEP_ARCHIVE`, `GLACIER_IR`, `EXPRESS_ONEZONE`."
   }
@@ -178,8 +181,12 @@ variable "directories" {
     (Optional) `key_prefix` - The key prefix to prepend to each object key. The object key is built as `key_prefix` followed by the file path relative to `path`. Defaults to an empty string (`""`).
     (Optional) `include_patterns` - A list of glob patterns to include files in the directory. Defaults to `["**"]` (all files).
     (Optional) `exclude_patterns` - A list of glob patterns to exclude files from the matched files. Defaults to `[]`.
-    (Optional) `storage_class` - The storage class of the objects. Valid values are `STANDARD`, `REDUCED_REDUNDANCY`, `STANDARD_IA`, `ONEZONE_IA`, `INTELLIGENT_TIERING`, `GLACIER`, `DEEP_ARCHIVE`, `GLACIER_IR` and `EXPRESS_ONEZONE`. Defaults to `STANDARD`.
+    (Optional) `content_type` - The standard MIME type of the objects. If not provided, the content type is inferred from the file extension of each object key. Defaults to `application/octet-stream` if the extension is unknown.
+    (Optional) `storage_class` - The storage class of the objects. Valid values are `STANDARD`, `REDUCED_REDUNDANCY`, `STANDARD_IA`, `ONEZONE_IA`, `INTELLIGENT_TIERING`, `GLACIER`, `DEEP_ARCHIVE`, `GLACIER_IR` and `EXPRESS_ONEZONE`. If not provided, the objects are created as `STANDARD`, and the storage class transitioned afterward by the bucket lifecycle rules is kept as is. Explicitly providing a value reverts the transitioned storage class back on the next apply by re-uploading the objects.
     (Optional) `cache_control` - The caching behavior along the request/reply chain for the objects.
+    (Optional) `content_disposition` - The presentational information for the objects.
+    (Optional) `content_encoding` - The content encodings that have been applied to the objects and thus what decoding mechanisms must be applied to obtain the media-type referenced by the `content_type`.
+    (Optional) `content_language` - The language the object contents are in.
     (Optional) `metadata` - A map of keys/values to provision metadata for the objects. Metadata keys are always converted to lowercase by AWS.
     (Optional) `tags` - A map of tags to add to the objects.
   EOF
@@ -189,9 +196,14 @@ variable "directories" {
     include_patterns = optional(list(string), ["**"])
     exclude_patterns = optional(list(string), [])
 
-    storage_class = optional(string, "STANDARD")
-    cache_control = optional(string)
-    metadata      = optional(map(string), {})
+    content_type = optional(string)
+
+    storage_class       = optional(string)
+    cache_control       = optional(string)
+    content_disposition = optional(string)
+    content_encoding    = optional(string)
+    content_language    = optional(string)
+    metadata            = optional(map(string), {})
 
     tags = optional(map(string), {})
   }))
@@ -201,7 +213,10 @@ variable "directories" {
   validation {
     condition = alltrue([
       for directory in var.directories :
-      contains(["STANDARD", "REDUCED_REDUNDANCY", "STANDARD_IA", "ONEZONE_IA", "INTELLIGENT_TIERING", "GLACIER", "DEEP_ARCHIVE", "GLACIER_IR", "EXPRESS_ONEZONE"], directory.storage_class)
+      (directory.storage_class == null
+        ? true
+        : contains(["STANDARD", "REDUCED_REDUNDANCY", "STANDARD_IA", "ONEZONE_IA", "INTELLIGENT_TIERING", "GLACIER", "DEEP_ARCHIVE", "GLACIER_IR", "EXPRESS_ONEZONE"], directory.storage_class)
+      )
     ])
     error_message = "Valid values for `storage_class` are `STANDARD`, `REDUCED_REDUNDANCY`, `STANDARD_IA`, `ONEZONE_IA`, `INTELLIGENT_TIERING`, `GLACIER`, `DEEP_ARCHIVE`, `GLACIER_IR`, `EXPRESS_ONEZONE`."
   }
