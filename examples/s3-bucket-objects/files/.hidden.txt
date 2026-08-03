@@ -1,0 +1,1 @@
+This file is excluded from the sync by `exclude_patterns`.

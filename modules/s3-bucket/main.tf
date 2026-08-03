@@ -24,7 +24,6 @@ locals {
 # TODO: aws_s3_bucket_intelligent_tiering_configuration
 # TODO: aws_s3_bucket_inventory
 # TODO: aws_s3_bucket_notification
-# TODO: aws_s3_object
 # TODO: aws_s3_bucket_metadata_configuration
 resource "aws_s3_bucket" "this" {
   region = var.region
@@ -65,7 +64,7 @@ locals {
   encryption_type = {
     "AES256"       = "AES256"
     "AWS_KMS"      = "aws:kms"
-    "AWS_KMS_DSSE" = "aws:kms::dsse"
+    "AWS_KMS_DSSE" = "aws:kms:dsse"
   }
 }
 

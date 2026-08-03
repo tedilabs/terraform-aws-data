@@ -203,6 +203,11 @@ output "transfer_acceleration" {
   }
 }
 
+output "objects" {
+  description = "The objects uploaded to the S3 bucket by the object key."
+  value       = try(module.objects[0].objects, {})
+}
+
 output "resource_group" {
   description = "The resource group created to manage resources in this module."
   value = merge(
