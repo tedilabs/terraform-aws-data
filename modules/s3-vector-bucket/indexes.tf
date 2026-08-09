@@ -29,10 +29,10 @@ resource "aws_s3vectors_index" "this" {
   }
 
   dynamic "metadata_configuration" {
-    for_each = length(each.value.non_filterable_metadata_keys) > 0 ? ["go"] : []
+    for_each = length(each.value.metadata.non_filterable_keys) > 0 ? ["go"] : []
 
     content {
-      non_filterable_metadata_keys = each.value.non_filterable_metadata_keys
+      non_filterable_metadata_keys = each.value.metadata.non_filterable_keys
     }
   }
 

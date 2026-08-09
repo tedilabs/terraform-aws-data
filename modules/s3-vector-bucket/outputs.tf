@@ -1,3 +1,10 @@
+locals {
+  indexes = {
+    for index in var.indexes :
+    index.name => index
+  }
+}
+
 output "region" {
   description = "The AWS region this module resources resides in."
   value       = aws_s3vectors_vector_bucket.this.region
@@ -38,7 +45,22 @@ output "indexes" {
       dimension       = index.dimension
       distance_metric = index.distance_metric
 
-      non_filterable_metadata_keys = try(index.metadata_configuration[0].non_filterable_metadata_keys, [])
+      encryption = merge(
+        {
+          override = local.indexes[name].encryption != null
+        },
+        (local.indexes[name].encryption != null
+          ? {
+            type    = local.indexes[name].encryption.type
+            kms_key = local.indexes[name].encryption.kms_key
+          }
+          : {}
+        )
+      )
+
+      metadata = {
+        non_filterable_keys = try(index.metadata_configuration[0].non_filterable_metadata_keys, [])
+      }
 
       created_at = index.creation_time
     }
@@ -81,7 +103,7 @@ output "resource_group" {
 #       name => {
 #         for k, v in index :
 #         k => v
-#         if !contains(["tags", "tags_all", "region", "vector_bucket_name", "index_name", "data_type", "dimension", "distance_metric", "encryption_configuration", "index_arn", "creation_time"], k)
+#         if !contains(["tags", "tags_all", "region", "vector_bucket_name", "index_name", "data_type", "dimension", "distance_metric", "encryption_configuration", "index_arn", "creation_time", "metadata_configuration"], k)
 #       }
 #     }
 #   }

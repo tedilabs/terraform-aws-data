@@ -56,7 +56,9 @@ module "vector_bucket" {
       name      = "documents"
       dimension = 1024
 
-      non_filterable_metadata_keys = ["chunk"]
+      metadata = {
+        non_filterable_keys = ["chunk"]
+      }
     },
     {
       name            = "images"

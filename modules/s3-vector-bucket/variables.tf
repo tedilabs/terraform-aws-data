@@ -52,7 +52,8 @@ variable "indexes" {
     (Optional) `encryption` - A configuration of Server-Side Encryption for the vector index. If not provided, the encryption configuration of the vector bucket is used. `encryption` as defined below.
       (Optional) `type` - The server-side encryption type to use. Valid values are `AES256` and `AWS_KMS`. Defaults to `AES256`.
       (Optional) `kms_key` - The ARN of the AWS KMS key used for the `SSE-KMS` encryption. This can only be used when you set the value of `encryption.type` as `AWS_KMS`.
-    (Optional) `non_filterable_metadata_keys` - A set of metadata keys that cannot be used as query filters. Non-filterable metadata is only returned with query results.
+    (Optional) `metadata` - A configuration of the metadata for the vector index. `metadata` as defined below.
+      (Optional) `non_filterable_keys` - A set of metadata keys that cannot be used as query filters. Non-filterable metadata is only returned with query results.
     (Optional) `tags` - A map of tags to add to the vector index.
   EOF
   type = list(object({
@@ -66,7 +67,9 @@ variable "indexes" {
       type    = optional(string, "AES256")
       kms_key = optional(string)
     }))
-    non_filterable_metadata_keys = optional(set(string), [])
+    metadata = optional(object({
+      non_filterable_keys = optional(set(string), [])
+    }), {})
 
     tags = optional(map(string), {})
   }))
