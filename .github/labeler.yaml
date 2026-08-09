@@ -48,3 +48,8 @@
 - changed-files:
   - any-glob-to-any-file:
     - modules/s3-objects/**/*
+
+":floppy_disk: s3-vector-bucket":
+- changed-files:
+  - any-glob-to-any-file:
+    - modules/s3-vector-bucket/**/*

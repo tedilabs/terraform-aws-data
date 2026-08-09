@@ -16,6 +16,7 @@ Terraform module which creates data related resources on AWS.
 - [s3-access-point](./modules/s3-access-point)
 - [s3-bucket](./modules/s3-bucket)
 - [s3-objects](./modules/s3-objects)
+- [s3-vector-bucket](./modules/s3-vector-bucket)
 
 
 ## Target AWS Services
@@ -38,6 +39,9 @@ Terraform Modules from [this package](https://github.com/tedilabs/terraform-aws-
   - S3 Bucket
   - S3 Access Point
   - S3 Object
+  - S3 Vectors
+    - Vector Bucket
+    - Vector Index
 
 
 ## Examples
@@ -64,6 +68,10 @@ Terraform Modules from [this package](https://github.com/tedilabs/terraform-aws-
 
 - [S3 Access Point (Internet Access)](./examples/s3-access-point-internet)
 - [S3 Access Point (VPC Access)](./examples/s3-access-point-vpc)
+
+### S3 Vectors
+
+- [S3 Vector Bucket](./examples/s3-vector-bucket)
 
 
 ## Self Promotion
