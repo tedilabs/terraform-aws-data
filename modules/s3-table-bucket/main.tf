@@ -26,7 +26,6 @@ locals {
   }
 }
 
-# TODO: aws_s3tables_table_bucket_replication
 resource "aws_s3tables_table_bucket" "this" {
   region = var.region
 

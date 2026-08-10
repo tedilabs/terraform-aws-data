@@ -94,6 +94,57 @@ variable "policy" {
   nullable    = true
 }
 
+variable "replication" {
+  description = <<EOF
+  (Optional) A configurations of Replication for the S3 table bucket. Replication applies to all tables in the source table bucket. `replication` as defined below.
+    (Optional) `rules` - A list of replication rules. The service currently supports only one rule per replication configuration. Each value of `rules` as defined below.
+      (Required) `destinations` - A set of ARNs of the destination table buckets to replicate source tables to. Each rule supports up to 5 destinations.
+    (Optional) `service_role` - The ARN (Amazon Resource Name) of the IAM Role that Amazon S3 assumes when replicating tables. Only required if `replication.default_service_role.enabled` is `false`.
+    (Optional) `default_service_role` - A configuration for the default service role for the table bucket replication. Use `replication.service_role` if `replication.default_service_role.enabled` is `false`. Add KMS permissions with `policies` or `inline_policies` if the tables are encrypted with KMS. `default_service_role` as defined below.
+      (Optional) `enabled` - Whether to create the default service role. Defaults to `true`.
+      (Optional) `name` - The name of the default service role. Defaults to `s3tables-$${var.name}-replication`.
+      (Optional) `path` - The path of the default service role. Defaults to `/`.
+      (Optional) `description` - The description of the default service role.
+      (Optional) `policies` - A list of IAM policy ARNs to attach to the default service role. Defaults to `[]`.
+      (Optional) `inline_policies` - A Map of inline IAM policies to attach to the default service role. (`name` => `policy`).
+      (Optional) `permissions_boundary` - The ARN of the IAM policy to use as permissions boundary for the default service role.
+  EOF
+  type = object({
+    rules = optional(list(object({
+      destinations = set(string)
+    })), [])
+
+    service_role = optional(string)
+    default_service_role = optional(object({
+      enabled     = optional(bool, true)
+      name        = optional(string)
+      path        = optional(string, "/")
+      description = optional(string, "Managed by Terraform.")
+
+      policies             = optional(list(string), [])
+      inline_policies      = optional(map(string), {})
+      permissions_boundary = optional(string)
+    }), {})
+  })
+  default  = {}
+  nullable = false
+
+  validation {
+    condition = alltrue([
+      for rule in var.replication.rules :
+      length(rule.destinations) >= 1 && length(rule.destinations) <= 5
+    ])
+    error_message = "Each rule must have between `1` and `5` destinations."
+  }
+  validation {
+    condition = (length(var.replication.rules) == 0
+      || var.replication.default_service_role.enabled
+      || var.replication.service_role != null
+    )
+    error_message = "`replication.service_role` is required if `replication.default_service_role.enabled` is `false`."
+  }
+}
+
 variable "tags" {
   description = "(Optional) A map of tags to add to all resources."
   type        = map(string)

@@ -58,6 +58,27 @@ output "namespaces" {
   }
 }
 
+output "replication" {
+  description = "The replication configuration of the table bucket."
+  value = merge(
+    {
+      enabled = local.replication_enabled
+    },
+    (local.replication_enabled
+      ? {
+        service_role = local.replication_service_role
+        rules = [
+          for rule in aws_s3tables_table_bucket_replication.this[0].rule : {
+            destinations = rule.destination[*].destination_table_bucket_arn
+          }
+        ]
+        version_token = aws_s3tables_table_bucket_replication.this[0].version_token
+      }
+      : {}
+    ),
+  )
+}
+
 output "resource_group" {
   description = "The resource group created to manage resources in this module."
   value = merge(
