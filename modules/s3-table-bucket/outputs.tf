@@ -26,15 +26,22 @@ output "created_at" {
 output "encryption" {
   description = "The configuration for the Server-Side Encryption of the table bucket."
   value = {
-    type    = var.encryption.type
-    kms_key = var.encryption.kms_key
+    type = {
+      for k, v in local.encryption_type :
+      v => k
+    }[aws_s3tables_table_bucket.this.encryption_configuration.sse_algorithm]
+    kms_key = aws_s3tables_table_bucket.this.encryption_configuration.kms_key_arn
   }
 }
 
 output "maintenance" {
   description = "The maintenance configuration of the table bucket."
   value = {
-    unreferenced_file_removal = var.maintenance.unreferenced_file_removal
+    unreferenced_file_removal = try({
+      enabled           = aws_s3tables_table_bucket.this.maintenance_configuration.iceberg_unreferenced_file_removal.status == "enabled"
+      unreferenced_days = aws_s3tables_table_bucket.this.maintenance_configuration.iceberg_unreferenced_file_removal.settings.unreferenced_days
+      non_current_days  = aws_s3tables_table_bucket.this.maintenance_configuration.iceberg_unreferenced_file_removal.settings.non_current_days
+    }, null)
   }
 }
 
