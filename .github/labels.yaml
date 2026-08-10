@@ -33,5 +33,8 @@
   description: "This issue or pull request is related to s3-objects module."
   name: ":floppy_disk: s3-objects"
 - color: "fbca04"
+  description: "This issue or pull request is related to s3-table-bucket module."
+  name: ":floppy_disk: s3-table-bucket"
+- color: "fbca04"
   description: "This issue or pull request is related to s3-vector-bucket module."
   name: ":floppy_disk: s3-vector-bucket"
