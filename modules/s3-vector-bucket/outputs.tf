@@ -1,10 +1,3 @@
-locals {
-  indexes = {
-    for index in var.indexes :
-    index.name => index
-  }
-}
-
 output "region" {
   description = "The AWS region this module resources resides in."
   value       = aws_s3vectors_vector_bucket.this.region
@@ -28,8 +21,11 @@ output "created_at" {
 output "encryption" {
   description = "The configuration for the Server-Side Encryption of the vector bucket."
   value = {
-    type    = var.encryption.type
-    kms_key = var.encryption.kms_key
+    type = {
+      for k, v in local.encryption_type :
+      v => k
+    }[one(aws_s3vectors_vector_bucket.this.encryption_configuration[*].sse_type)]
+    kms_key = one(aws_s3vectors_vector_bucket.this.encryption_configuration[*].kms_key_arn)
   }
 }
 
@@ -47,12 +43,15 @@ output "indexes" {
 
       encryption = merge(
         {
-          override = local.indexes[name].encryption != null
+          override = length(index.encryption_configuration) > 0
         },
-        (local.indexes[name].encryption != null
+        (length(index.encryption_configuration) > 0
           ? {
-            type    = local.indexes[name].encryption.type
-            kms_key = local.indexes[name].encryption.kms_key
+            type = {
+              for k, v in local.encryption_type :
+              v => k
+            }[index.encryption_configuration[0].sse_type]
+            kms_key = index.encryption_configuration[0].kms_key_arn
           }
           : {}
         )

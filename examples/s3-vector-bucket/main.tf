@@ -7,17 +7,10 @@ provider "aws" {
 # S3 Vector Bucket
 ###################################################
 
-resource "random_string" "this" {
-  length  = 32
-  special = false
-  numeric = false
-  upper   = false
-}
-
 data "aws_caller_identity" "this" {}
 
 locals {
-  bucket_name = random_string.this.id
+  bucket_name = "vector-bucket-example-${local.account_id}"
   account_id  = data.aws_caller_identity.this.account_id
 }
 

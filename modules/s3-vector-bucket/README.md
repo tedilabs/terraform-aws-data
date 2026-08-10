@@ -12,6 +12,7 @@ This module creates following resources.
 - The encryption configuration of the vector bucket forces a new vector bucket to be created when changed. Decide the KMS key before creating the bucket.
 - Vector data plane operations (`PutVectors`, `QueryVectors`, ...) are not managed by Terraform. Use AWS SDKs in your application.
 - `force_destroy` requires a successful `terraform apply` run after it is set to `true` before it takes effect on a destroy operation.
+- `policy` determines whether to create the policy resource, so it must be known at plan time. Avoid interpolating values that are unknown until apply (e.g. generated bucket names) in the policy document. Use `*` to refer to the resources the policy is attached to instead.
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
