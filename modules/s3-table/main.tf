@@ -46,20 +46,27 @@ resource "aws_s3tables_table" "this" {
   ## Only used to define the initial schema on creation. The schema is
   ## evolved by query engines afterwards.
   dynamic "metadata" {
-    for_each = length(var.schema) > 0 ? ["go"] : []
+    for_each = (anytrue([
+      length(var.metadata.schema) > 0,
+      length(var.metadata.properties) > 0,
+    ]) ? [var.metadata] : [])
 
     content {
       iceberg {
-        properties = length(var.iceberg_properties) > 0 ? var.iceberg_properties : null
+        properties = length(metadata.value.properties) > 0 ? metadata.value.properties : null
 
-        schema {
-          dynamic "field" {
-            for_each = var.schema
+        dynamic "schema" {
+          for_each = length(metadata.value.schema) > 0 ? [metadata.value.schema] : []
 
-            content {
-              name     = field.value.name
-              type     = field.value.type
-              required = field.value.required
+          content {
+            dynamic "field" {
+              for_each = schema.value
+
+              content {
+                name     = field.value.name
+                type     = field.value.type
+                required = field.value.required
+              }
             }
           }
         }

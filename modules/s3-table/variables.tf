@@ -59,36 +59,34 @@ variable "encryption" {
   }
 }
 
-variable "schema" {
+variable "metadata" {
   description = <<EOF
-  (Optional) A list of schema fields for the Iceberg table. Each field defines a column in the table schema. Only used to define the initial schema when the table is created. The schema is evolved by query engines afterwards. Each value of `schema` as defined below.
-    (Required) `name` - The name of the field.
-    (Required) `type` - The field type. S3 Tables supports all Apache Iceberg primitive types including `boolean`, `int`, `long`, `float`, `double`, `decimal(precision,scale)`, `date`, `time`, `timestamp`, `timestamptz`, `string`, `uuid`, `fixed(length)`, `binary`.
-    (Optional) `required` - Whether values are required for each row in this field. Defaults to `false`.
+  (Optional) A configuration of the metadata for the Iceberg table. Only used to define the initial metadata when the table is created. The schema is evolved by query engines afterwards. `metadata` as defined below.
+    (Optional) `schema` - A list of schema fields for the Iceberg table. Each field defines a column in the table schema, and the order of the fields defines the column order. Each value of `schema` as defined below.
+      (Required) `name` - The name of the field.
+      (Required) `type` - The field type. S3 Tables supports all Apache Iceberg primitive types including `boolean`, `int`, `long`, `float`, `double`, `decimal(precision,scale)`, `date`, `time`, `timestamp`, `timestamptz`, `string`, `uuid`, `fixed(length)`, `binary`.
+      (Optional) `required` - Whether values are required for each row in this field. Defaults to `false`.
+    (Optional) `properties` - A map of configuration properties for the Iceberg table, for example `write.distribution-mode` and `write.sort-order`. Can only be used with `schema`. Changing this forces a new table to be created.
   EOF
-  type = list(object({
-    name     = string
-    type     = string
-    required = optional(bool, false)
-  }))
-  default  = []
+  type = object({
+    schema = optional(list(object({
+      name     = string
+      type     = string
+      required = optional(bool, false)
+    })), [])
+    properties = optional(map(string), {})
+  })
+  default  = {}
   nullable = false
 
   validation {
-    condition     = length(distinct(var.schema[*].name)) == length(var.schema)
-    error_message = "`name` of each field must be unique within `schema`."
+    condition     = length(distinct(var.metadata.schema[*].name)) == length(var.metadata.schema)
+    error_message = "`name` of each field must be unique within `metadata.schema`."
   }
-}
-
-variable "iceberg_properties" {
-  description = "(Optional) A map of configuration properties for the Iceberg table, for example `write.distribution-mode` and `write.sort-order`. Only used with `schema`. Changing this forces a new table to be created."
-  type        = map(string)
-  default     = {}
-  nullable    = false
-
   validation {
-    condition     = length(var.iceberg_properties) == 0 || length(var.schema) > 0
-    error_message = "`iceberg_properties` can only be used when `schema` is provided."
+    # INFO: The provider requires `metadata[0].iceberg[0].schema` when the `metadata` block is present.
+    condition     = length(var.metadata.properties) == 0 || length(var.metadata.schema) > 0
+    error_message = "`metadata.properties` can only be used when `metadata.schema` is provided."
   }
 }
 

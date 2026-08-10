@@ -73,6 +73,23 @@ output "warehouse_location" {
   value       = aws_s3tables_table.this.warehouse_location
 }
 
+output "metadata" {
+  description = "The metadata of the table. Only reflects the initial metadata defined when the table was created. The schema is evolved by query engines afterwards."
+  value = (length(aws_s3tables_table.this.metadata) > 0
+    ? {
+      schema = [
+        for field in aws_s3tables_table.this.metadata[0].iceberg[0].schema[0].field : {
+          name     = field.name
+          type     = field.type
+          required = field.required
+        }
+      ]
+      properties = aws_s3tables_table.this.metadata[0].iceberg[0].properties
+    }
+    : null
+  )
+}
+
 output "encryption" {
   description = "The configuration for the Server-Side Encryption of the table. `override` indicates whether the table overrides the encryption configuration of the table bucket."
   value = merge(

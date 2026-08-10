@@ -96,21 +96,23 @@ module "table" {
 
   policy = data.aws_iam_policy_document.table.json
 
-  schema = [
-    {
-      name     = "id"
-      type     = "long"
-      required = true
-    },
-    {
-      name = "type"
-      type = "string"
-    },
-    {
-      name = "created_at"
-      type = "timestamp"
-    },
-  ]
+  metadata = {
+    schema = [
+      {
+        name     = "id"
+        type     = "long"
+        required = true
+      },
+      {
+        name = "type"
+        type = "string"
+      },
+      {
+        name = "created_at"
+        type = "timestamp"
+      },
+    ]
+  }
 
   maintenance = {
     snapshot_management = {
