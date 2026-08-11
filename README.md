@@ -13,12 +13,9 @@ Terraform module which creates data related resources on AWS.
 - [glue-data-catalog](./modules/glue-data-catalog)
 - [glue-database](./modules/glue-database)
 - [glue-table](./modules/glue-table)
-- [s3-access-point](./modules/s3-access-point)
-- [s3-bucket](./modules/s3-bucket)
-- [s3-objects](./modules/s3-objects)
-- [s3-table](./modules/s3-table)
-- [s3-table-bucket](./modules/s3-table-bucket)
-- [s3-vector-bucket](./modules/s3-vector-bucket)
+
+> [!NOTE]
+> S3 related modules have moved to [tedilabs/terraform-aws-s3](https://github.com/tedilabs/terraform-aws-s3). Each module in the new package drops the `s3-` prefix from its name. (e.g. `s3-bucket` → `bucket`)
 
 
 ## Target AWS Services
@@ -37,17 +34,6 @@ Terraform Modules from [this package](https://github.com/tedilabs/terraform-aws-
     - Data Catalog
     - Database
     - Table
-- **AWS S3**
-  - S3 Bucket
-  - S3 Access Point
-  - S3 Object
-  - S3 Tables
-    - Table Bucket
-    - Namespace
-    - Table
-  - S3 Vectors
-    - Vector Bucket
-    - Vector Index
 
 
 ## Examples
@@ -60,28 +46,6 @@ Terraform Modules from [this package](https://github.com/tedilabs/terraform-aws-
 
 - [Glue Data Catalog (Simple)](./examples/glue-data-catalog-simple)
 - [Glue Data Catalog (Full)](./examples/glue-data-catalog-full)
-
-### S3 Bucket
-
-- [Full S3 Bucket](./examples/s3-bucket-full)
-- [S3 Bucket with Access Logging](./examples/s3-bucket-access-logging)
-- [S3 Bucket with Server-Side Encryption](./examples/s3-bucket-encryption)
-- [S3 Bucket with Lifecycle Rules](./examples/s3-bucket-lifecycle-rules)
-- [S3 Bucket with Objects](./examples/s3-bucket-objects)
-- [S3 Bucket with Versioning](./examples/s3-bucket-versioning)
-
-### S3 Access Point
-
-- [S3 Access Point (Internet Access)](./examples/s3-access-point-internet)
-- [S3 Access Point (VPC Access)](./examples/s3-access-point-vpc)
-
-### S3 Tables
-
-- [S3 Table Bucket with Table](./examples/s3-table-bucket)
-
-### S3 Vectors
-
-- [S3 Vector Bucket](./examples/s3-vector-bucket)
 
 
 ## Self Promotion
