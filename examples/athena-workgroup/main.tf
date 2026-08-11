@@ -35,18 +35,25 @@ module "full" {
   enabled       = true
   force_destroy = true
 
-  client_config_enabled                     = false
   cloudwatch_metrics_enabled                = true
   query_on_s3_requester_pays_bucket_enabled = false
 
   per_query_data_usage_limit = 64 * 1024 * 1024
 
   query_result = {
-    s3_bucket          = "tedilabs-terraform-aws-data-examples-athena-workgroup"
-    s3_key_prefix      = "/athena-query-results"
-    encryption_enabled = true
-    encryption_mode    = "SSE_S3"
-    encryption_kms_key = null
+    management_mode        = "CUSTOMER_MANAGED"
+    override_client_config = true
+
+    customer_managed_query_result = {
+      s3_bucket = {
+        name       = "tedilabs-terraform-aws-data-examples-athena-workgroup"
+        key_prefix = "athena-query-results/"
+      }
+      encryption = {
+        enabled = true
+        mode    = "SSE_S3"
+      }
+    }
   }
 
   named_queries = [
