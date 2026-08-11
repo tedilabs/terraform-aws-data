@@ -21,7 +21,7 @@ locals {
 module "bucket" {
   source = "../../modules/s3-bucket"
   # source  = "tedilabs/data/aws//modules/s3-bucket"
-  # version = "~> 0.2.0"
+  # version = "~> 0.8.0"
 
   name          = local.bucket_name
   force_destroy = true

@@ -22,7 +22,7 @@ locals {
 module "bucket" {
   source = "../../modules/s3-bucket"
   # source  = "tedilabs/data/aws//modules/s3-bucket"
-  # version = "~> 0.2.0"
+  # version = "~> 0.8.0"
 
   name          = "${local.bucket_name}-aes256"
   force_destroy = true
@@ -40,7 +40,7 @@ module "bucket" {
 module "bucket_kms" {
   source = "../../modules/s3-bucket"
   # source  = "tedilabs/data/aws//modules/s3-bucket"
-  # version = "~> 0.2.0"
+  # version = "~> 0.8.0"
 
   name          = "${local.bucket_name}-aws-kms"
   force_destroy = true
@@ -58,7 +58,7 @@ module "bucket_kms" {
 
 module "kms_key" {
   source  = "tedilabs/secret/aws//modules/kms-key"
-  version = "~> 0.3.0"
+  version = "~> 0.7.0"
 
   name = local.kms_key_name
 

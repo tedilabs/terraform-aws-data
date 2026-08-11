@@ -21,7 +21,7 @@ locals {
 module "source_bucket" {
   source = "../../modules/s3-bucket"
   # source  = "tedilabs/data/aws//modules/s3-bucket"
-  # version = "~> 0.2.0"
+  # version = "~> 0.8.0"
 
   name          = "${local.bucket_name}-source"
   force_destroy = true
@@ -40,7 +40,7 @@ module "source_bucket" {
 module "target_bucket" {
   source = "../../modules/s3-bucket"
   # source  = "tedilabs/data/aws//modules/s3-bucket"
-  # version = "~> 0.2.0"
+  # version = "~> 0.8.0"
 
   name          = "${local.bucket_name}-target"
   force_destroy = true
