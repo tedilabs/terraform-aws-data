@@ -8,7 +8,7 @@ data "aws_region" "this" {}
 
 locals {
   partition  = data.aws_partition.this.partition
-  region     = data.aws_region.this.name
+  region     = data.aws_region.this.region
   account_id = data.aws_caller_identity.this.account_id
 }
 
