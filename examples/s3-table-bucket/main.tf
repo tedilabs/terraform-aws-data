@@ -38,7 +38,7 @@ data "aws_iam_policy_document" "table_bucket" {
 module "table_bucket" {
   source = "../../modules/s3-table-bucket"
   # source  = "tedilabs/data/aws//modules/s3-table-bucket"
-  # version = "~> 0.7.0"
+  # version = "~> 0.8.0"
 
   name          = local.bucket_name
   force_destroy = true
@@ -88,7 +88,7 @@ data "aws_iam_policy_document" "table" {
 module "table" {
   source = "../../modules/s3-table"
   # source  = "tedilabs/data/aws//modules/s3-table"
-  # version = "~> 0.7.0"
+  # version = "~> 0.8.0"
 
   table_bucket = module.table_bucket.arn
   namespace    = module.table_bucket.namespaces["analytics"].name

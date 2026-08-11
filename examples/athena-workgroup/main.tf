@@ -10,7 +10,7 @@ provider "aws" {
 module "simple" {
   source = "../../modules/athena-workgroup"
   # source  = "tedilabs/data/aws//modules/athena-workgroup"
-  # version = "~> 0.2.0"
+  # version = "~> 0.8.0"
 
   name = "simple"
 
@@ -27,7 +27,7 @@ module "simple" {
 module "full" {
   source = "../../modules/athena-workgroup"
   # source  = "tedilabs/data/aws//modules/athena-workgroup"
-  # version = "~> 0.2.0"
+  # version = "~> 0.8.0"
 
   name        = "full"
   description = "This workgroup is created with full configurtaions."

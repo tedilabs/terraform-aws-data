@@ -10,7 +10,7 @@ provider "aws" {
 module "data_catalog" {
   source = "../../modules/glue-data-catalog"
   # source  = "tedilabs/data/aws//modules/glue-data-catalog"
-  # version = "~> 0.2.0"
+  # version = "~> 0.8.0"
 
   encryption_for_connection_passwords = {
     enabled = false
@@ -32,7 +32,7 @@ module "data_catalog" {
 module "database" {
   source = "../../modules/glue-database"
   # source  = "tedilabs/data/aws//modules/glue-database"
-  # version = "~> 0.2.0"
+  # version = "~> 0.8.0"
 
   name = "example"
 
@@ -49,7 +49,7 @@ module "database" {
 module "table" {
   source = "../../modules/glue-table"
   # source  = "tedilabs/data/aws//modules/glue-table"
-  # version = "~> 0.2.0"
+  # version = "~> 0.8.0"
 
   database = module.database.name
   name     = "helloworld"

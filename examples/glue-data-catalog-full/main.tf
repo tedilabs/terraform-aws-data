@@ -91,7 +91,7 @@ locals {
 
 module "kms_key" {
   source  = "tedilabs/secret/aws//modules/kms-key"
-  version = "~> 0.3.0"
+  version = "~> 0.7.0"
 
   name        = "example-glue"
   aliases     = ["alias/example-glue"]
@@ -117,7 +117,7 @@ module "kms_key" {
 module "data_catalog" {
   source = "../../modules/glue-data-catalog"
   # source  = "tedilabs/data/aws//modules/glue-data-catalog"
-  # version = "~> 0.2.0"
+  # version = "~> 0.8.0"
 
   policy = data.aws_iam_policy_document.this.json
 
@@ -143,7 +143,7 @@ module "data_catalog" {
 module "database" {
   source = "../../modules/glue-database"
   # source  = "tedilabs/data/aws//modules/glue-database"
-  # version = "~> 0.2.0"
+  # version = "~> 0.8.0"
 
   for_each = {
     for database in try(local.databases, []) :
@@ -169,7 +169,7 @@ module "database" {
 module "table" {
   source = "../../modules/glue-table"
   # source  = "tedilabs/data/aws//modules/glue-table"
-  # version = "~> 0.2.0"
+  # version = "~> 0.8.0"
 
   for_each = {
     for table in try(local.tables, []) :

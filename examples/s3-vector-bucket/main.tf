@@ -37,7 +37,7 @@ data "aws_iam_policy_document" "this" {
 module "vector_bucket" {
   source = "../../modules/s3-vector-bucket"
   # source  = "tedilabs/data/aws//modules/s3-vector-bucket"
-  # version = "~> 0.7.0"
+  # version = "~> 0.8.0"
 
   name          = local.bucket_name
   force_destroy = true
