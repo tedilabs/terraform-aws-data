@@ -41,12 +41,58 @@ output "analytics_engine" {
   }
 }
 
+output "customer_content_encryption" {
+  description = "The configuration for encrypting data stores used by Athena for Apache Spark workgroups."
+  value = (var.analytics_engine.version == "PYSPARK_V3"
+    ? {
+      enabled = one(aws_athena_workgroup.this.configuration[0].customer_content_encryption_configuration[*]) != null
+      kms_key = one(aws_athena_workgroup.this.configuration[0].customer_content_encryption_configuration[*].kms_key)
+    }
+    : null
+  )
+}
+
+output "logging" {
+  description = "The configuration for logging of Apache Spark workgroups."
+  value = (local.engine_type == "APACHE_SPARK"
+    ? {
+      cloudwatch = {
+        enabled                = aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].cloud_watch_logging_configuration[0].enabled
+        log_group              = aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].cloud_watch_logging_configuration[0].log_group
+        log_stream_name_prefix = aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].cloud_watch_logging_configuration[0].log_stream_name_prefix
+        log_types = {
+          for log_type in aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].cloud_watch_logging_configuration[0].log_type :
+          log_type.key => log_type.values
+        }
+      }
+      managed = {
+        enabled     = aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].managed_logging_configuration[0].enabled
+        sse_kms_key = aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].managed_logging_configuration[0].kms_key
+      }
+      s3_bucket = {
+        enabled     = aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].s3_logging_configuration[0].enabled
+        location    = aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].s3_logging_configuration[0].log_location
+        sse_kms_key = aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].s3_logging_configuration[0].kms_key
+      }
+    }
+    : null
+  )
+}
+
 output "query_result" {
   description = "The configuration for query result location and encryption."
   value = (local.engine_type == "ATHENA_SQL"
     ? {
       management_mode        = aws_athena_workgroup.this.configuration[0].managed_query_results_configuration[0].enabled ? "ATHENA_MANAGED" : "CUSTOMER_MANAGED"
       override_client_config = aws_athena_workgroup.this.configuration[0].enforce_workgroup_configuration
+      s3_access_grants = {
+        enabled             = one(aws_athena_workgroup.this.configuration[0].query_results_s3_access_grants_configuration[*].enable_s3_access_grants) != null
+        authentication_type = one(aws_athena_workgroup.this.configuration[0].query_results_s3_access_grants_configuration[*].authentication_type)
+        user_level_prefix_enabled = (one(aws_athena_workgroup.this.configuration[0].query_results_s3_access_grants_configuration[*].create_user_level_prefix) != null
+          ? one(aws_athena_workgroup.this.configuration[0].query_results_s3_access_grants_configuration[*].create_user_level_prefix)
+          : false
+        )
+      }
 
       athena_managed_query_result = (aws_athena_workgroup.this.configuration[0].managed_query_results_configuration[0].enabled
         ? {

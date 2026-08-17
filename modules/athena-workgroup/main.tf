@@ -55,9 +55,62 @@ resource "aws_athena_workgroup" "this" {
       selected_engine_version = local.engine_versions[var.analytics_engine.version]
     }
 
+    dynamic "customer_content_encryption_configuration" {
+      for_each = var.analytics_engine.version == "PYSPARK_V3" && var.customer_content_encryption.enabled ? [var.customer_content_encryption] : []
+      iterator = encryption
+
+      content {
+        kms_key = encryption.value.kms_key
+      }
+    }
+
+    dynamic "monitoring_configuration" {
+      for_each = local.engine_type == "APACHE_SPARK" ? [var.logging] : []
+      iterator = logging
+
+      content {
+        cloud_watch_logging_configuration {
+          enabled                = logging.value.cloudwatch.enabled
+          log_group              = logging.value.cloudwatch.log_group
+          log_stream_name_prefix = logging.value.cloudwatch.log_stream_name_prefix
+
+          dynamic "log_type" {
+            for_each = logging.value.cloudwatch.log_types
+
+            content {
+              key    = log_type.key
+              values = log_type.value
+            }
+          }
+        }
+
+        managed_logging_configuration {
+          enabled = logging.value.managed.enabled
+          kms_key = logging.value.managed.sse_kms_key
+        }
+
+        s3_logging_configuration {
+          enabled      = logging.value.s3_bucket.enabled
+          log_location = logging.value.s3_bucket.location
+          kms_key      = logging.value.s3_bucket.sse_kms_key
+        }
+      }
+    }
+
 
     ## Query Result (for ATHENA_SQL engine types)
     enforce_workgroup_configuration = var.query_result.override_client_config
+
+    dynamic "query_results_s3_access_grants_configuration" {
+      for_each = local.engine_type == "ATHENA_SQL" && var.query_result.s3_access_grants.enabled ? [var.query_result.s3_access_grants] : []
+      iterator = config
+
+      content {
+        enable_s3_access_grants  = config.value.enabled
+        authentication_type      = config.value.authentication_type
+        create_user_level_prefix = config.value.user_level_prefix_enabled
+      }
+    }
 
     dynamic "managed_query_results_configuration" {
       for_each = local.engine_type == "ATHENA_SQL" ? [var.query_result] : []
