@@ -49,6 +49,73 @@ variable "analytics_engine" {
   }
 }
 
+variable "customer_content_encryption" {
+  description = <<EOF
+  (Optional) A configurations for encrypting data stores such as notebooks and calculation code used by Athena for Apache Spark workgroups. Only supported if `analytics_engine.version` is `PYSPARK_V3`. A `customer_content_encryption` block as defined below.
+    (Optional) `enabled` - Whether to encrypt the data stores with a customer managed KMS key. An AWS owned key is used if disabled. Defaults to `false`.
+    (Optional) `kms_key` - The KMS key ARN used to encrypt the data stores. Required if `enabled` is `true`.
+  EOF
+  type = object({
+    enabled = optional(bool, false)
+    kms_key = optional(string)
+  })
+  default  = {}
+  nullable = false
+
+  validation {
+    condition = anytrue([
+      !var.customer_content_encryption.enabled,
+      var.customer_content_encryption.enabled && var.customer_content_encryption.kms_key != null,
+    ])
+    error_message = "When `customer_content_encryption.enabled` is `true`, `customer_content_encryption.kms_key` is required."
+  }
+}
+
+variable "logging" {
+  description = <<EOF
+  (Optional) A configurations for logging of Apache Spark workgroups. Only supported if you use Apache Spark engine types. A `logging` block as defined below.
+    (Optional) `cloudwatch` - A configurations for delivering logs to Amazon CloudWatch Logs. `cloudwatch` as defined below.
+      (Optional) `enabled` - Whether to enable CloudWatch logging. Defaults to `false`.
+      (Optional) `log_group` - The name of the CloudWatch log group.
+      (Optional) `log_stream_name_prefix` - The prefix of the CloudWatch log stream name.
+      (Optional) `log_types` - A map of worker types to log types. For example, `SPARK_DRIVER = ["STDOUT", "STDERR"]`.
+    (Optional) `managed` - A configurations for Athena managed log persistence. `managed` as defined below.
+      (Optional) `enabled` - Whether to enable managed log persistence. Defaults to `true`.
+      (Optional) `sse_kms_key` - The KMS key ARN used to encrypt the logs stored in managed log persistence.
+    (Optional) `s3_bucket` - A configurations for delivering logs to Amazon S3. `s3_bucket` as defined below.
+      (Optional) `enabled` - Whether to enable Amazon S3 logging. Defaults to `false`.
+      (Optional) `location` - The Amazon S3 destination URI for log publishing. Required if `s3_bucket.enabled` is `true`.
+      (Optional) `sse_kms_key` - The KMS key ARN used to encrypt the logs published to the given Amazon S3 destination.
+  EOF
+  type = object({
+    cloudwatch = optional(object({
+      enabled                = optional(bool, false)
+      log_group              = optional(string)
+      log_stream_name_prefix = optional(string)
+      log_types              = optional(map(list(string)), {})
+    }), {})
+    managed = optional(object({
+      enabled     = optional(bool, true)
+      sse_kms_key = optional(string)
+    }), {})
+    s3_bucket = optional(object({
+      enabled     = optional(bool, false)
+      location    = optional(string, "")
+      sse_kms_key = optional(string)
+    }), {})
+  })
+  default  = {}
+  nullable = false
+
+  validation {
+    condition = anytrue([
+      !var.logging.s3_bucket.enabled,
+      var.logging.s3_bucket.enabled && startswith(var.logging.s3_bucket.location, "s3://"),
+    ])
+    error_message = "`logging.s3_bucket.location` is required and must start with `s3://` when `logging.s3_bucket.enabled` is `true`."
+  }
+}
+
 variable "query_result" {
   description = <<EOF
   (Optional) The configuration for query result location and encryption. Only required if you use Apache Spark engine types. `query_result` block as defined below.
@@ -56,6 +123,10 @@ variable "query_result" {
       `CUSTOMER_MANAGED` - You manage the storage for your query results and keep the results as long as you require.
       `ATHENA_MANAGED` - Athena manages the storage for your queries and retains query results for 24 hours.
     (Optional) `override_client_config` - Whether to override client-side settings. Defaults to `true`.
+    (Optional) `s3_access_grants` - A configurations for Amazon S3 Access Grants to control access to the query result location. Only supported if `iam_identity_center.enabled` is `true`. `s3_access_grants` as defined below.
+      (Optional) `enabled` - Whether to enable Amazon S3 Access Grants for query results. Defaults to `false`.
+      (Optional) `authentication_type` - The authentication type used for Amazon S3 Access Grants. Valid values are `DIRECTORY_IDENTITY`. Defaults to `DIRECTORY_IDENTITY`.
+      (Optional) `user_level_prefix_enabled` - Whether to append the user ID as an Amazon S3 path prefix to the query result output location. This keeps query results of each user in the workgroup isolated from other users. Require `override_client_config` to be `true`. Defaults to `false`.
     (Optional) `athena_managed_query_result` - A configurations for Athena managed query result. `athena_managed_query_result` as defined below.
       (Optional) `encryption` - A configurations for encryption of Athena managed query result. `encryption` as defined below.
         (Optional) `kms_key` - The KMS key Amazon Resource Name (ARN) used to encrypt the query results.
@@ -77,6 +148,11 @@ variable "query_result" {
   type = object({
     management_mode        = optional(string, "ATHENA_MANAGED")
     override_client_config = optional(bool, true)
+    s3_access_grants = optional(object({
+      enabled                   = optional(bool, false)
+      authentication_type       = optional(string, "DIRECTORY_IDENTITY")
+      user_level_prefix_enabled = optional(bool, false)
+    }), {})
     athena_managed_query_result = optional(object({
       encryption = optional(object({
         kms_key = optional(string, null)
@@ -103,6 +179,17 @@ variable "query_result" {
   validation {
     condition     = contains(["CUSTOMER_MANAGED", "ATHENA_MANAGED"], var.query_result.management_mode)
     error_message = "Valid values for `query_result.management_mode` are `CUSTOMER_MANAGED` and `ATHENA_MANAGED`."
+  }
+  validation {
+    condition     = contains(["DIRECTORY_IDENTITY"], var.query_result.s3_access_grants.authentication_type)
+    error_message = "Valid values for `query_result.s3_access_grants.authentication_type` are `DIRECTORY_IDENTITY`."
+  }
+  validation {
+    condition = anytrue([
+      !var.query_result.s3_access_grants.user_level_prefix_enabled,
+      var.query_result.s3_access_grants.user_level_prefix_enabled && var.query_result.override_client_config,
+    ])
+    error_message = "When `query_result.s3_access_grants.user_level_prefix_enabled` is `true`, `query_result.override_client_config` should be `true`."
   }
   validation {
     condition = anytrue([
@@ -171,6 +258,10 @@ variable "iam_identity_center" {
       var.iam_identity_center.enabled && var.query_result.management_mode == "CUSTOMER_MANAGED"
     ])
     error_message = "When `iam_identity_center.enabled` is `true`, `query_result.management_mode` should be `CUSTOMER_MANAGED`."
+  }
+  validation {
+    condition     = !var.query_result.s3_access_grants.enabled || var.iam_identity_center.enabled
+    error_message = "When `query_result.s3_access_grants.enabled` is `true`, `iam_identity_center.enabled` should be `true`."
   }
 }
 
