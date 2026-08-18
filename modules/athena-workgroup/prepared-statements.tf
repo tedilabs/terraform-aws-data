@@ -5,7 +5,7 @@
 resource "aws_athena_prepared_statement" "this" {
   for_each = {
     for statement in var.prepared_statements :
-    "${statement.database}:${statement.name}" => statement
+    statement.name => statement
   }
 
   region = var.region
