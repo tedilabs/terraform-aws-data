@@ -20,6 +20,8 @@ locals {
     var.logging.managed.sse_kms_key,
     var.logging.s3_bucket.sse_kms_key,
   ])
+  spark_logging_s3_path   = trimsuffix(trimprefix(var.logging.s3_bucket.location, "s3://"), "/")
+  spark_logging_s3_bucket = split("/", local.spark_logging_s3_path)[0]
 }
 
 
@@ -294,6 +296,26 @@ data "aws_iam_policy_document" "spark" {
       test     = "StringEquals"
       variable = "aws:ResourceAccount"
       values   = [local.account_id]
+    }
+  }
+
+  dynamic "statement" {
+    for_each = var.logging.s3_bucket.enabled ? ["go"] : []
+
+    content {
+      sid = "S3Logging"
+
+      effect = "Allow"
+      actions = [
+        "s3:GetBucketLocation",
+        "s3:ListBucket",
+        "s3:GetObject",
+        "s3:PutObject",
+      ]
+      resources = [
+        provider::aws::arn_build("aws", "s3", "", "", local.spark_logging_s3_bucket),
+        provider::aws::arn_build("aws", "s3", "", "", "${local.spark_logging_s3_path}/*"),
+      ]
     }
   }
 
