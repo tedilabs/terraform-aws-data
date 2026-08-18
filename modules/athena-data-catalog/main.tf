@@ -16,6 +16,8 @@ locals {
 
 
 resource "aws_athena_data_catalog" "this" {
+  region = var.region
+
   name        = var.name
   description = var.description
   type        = var.type
