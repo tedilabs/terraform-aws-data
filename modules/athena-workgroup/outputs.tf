@@ -57,22 +57,22 @@ output "logging" {
   value = (local.engine_type == "APACHE_SPARK"
     ? {
       cloudwatch = {
-        enabled                = aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].cloud_watch_logging_configuration[0].enabled
-        log_group              = aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].cloud_watch_logging_configuration[0].log_group
-        log_stream_name_prefix = aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].cloud_watch_logging_configuration[0].log_stream_name_prefix
+        enabled                = try(aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].cloud_watch_logging_configuration[0].enabled, false)
+        log_group              = try(aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].cloud_watch_logging_configuration[0].log_group, null)
+        log_stream_name_prefix = try(aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].cloud_watch_logging_configuration[0].log_stream_name_prefix, null)
         log_types = {
-          for log_type in aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].cloud_watch_logging_configuration[0].log_type :
+          for log_type in try(aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].cloud_watch_logging_configuration[0].log_type, []) :
           log_type.key => log_type.values
         }
       }
       managed = {
-        enabled     = aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].managed_logging_configuration[0].enabled
-        sse_kms_key = aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].managed_logging_configuration[0].kms_key
+        enabled     = try(aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].managed_logging_configuration[0].enabled, true)
+        sse_kms_key = try(aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].managed_logging_configuration[0].kms_key, null)
       }
       s3_bucket = {
-        enabled     = aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].s3_logging_configuration[0].enabled
-        location    = aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].s3_logging_configuration[0].log_location
-        sse_kms_key = aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].s3_logging_configuration[0].kms_key
+        enabled     = try(aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].s3_logging_configuration[0].enabled, false)
+        location    = try(aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].s3_logging_configuration[0].log_location, null)
+        sse_kms_key = try(aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].s3_logging_configuration[0].kms_key, null)
       }
     }
     : null

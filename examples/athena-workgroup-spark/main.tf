@@ -13,6 +13,23 @@ resource "aws_kms_key" "this" {
 
 
 ###################################################
+# S3 Bucket for Calculation Results and Logs
+###################################################
+
+module "bucket" {
+  source  = "tedilabs/s3/aws//modules/bucket"
+  version = "~> 0.1.0"
+
+  name          = "tedilabs-terraform-aws-data-examples-athena-workgroup-spark"
+  force_destroy = true
+
+  tags = {
+    "project" = "terraform-aws-data-examples"
+  }
+}
+
+
+###################################################
 # Athena Workgroup with PySpark Engine
 ###################################################
 
@@ -48,7 +65,7 @@ module "pyspark" {
     }
     s3_bucket = {
       enabled  = true
-      location = "s3://tedilabs-terraform-aws-data-examples-athena-workgroup/athena-spark-logs/"
+      location = "s3://${module.bucket.name}/athena-spark-logs/"
     }
   }
 

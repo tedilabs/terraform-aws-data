@@ -4,6 +4,23 @@ provider "aws" {
 
 
 ###################################################
+# S3 Bucket for Query Results
+###################################################
+
+module "bucket" {
+  source  = "tedilabs/s3/aws//modules/bucket"
+  version = "~> 0.1.0"
+
+  name          = "tedilabs-terraform-aws-data-examples-athena-workgroup"
+  force_destroy = true
+
+  tags = {
+    "project" = "terraform-aws-data-examples"
+  }
+}
+
+
+###################################################
 # Athena Workgroup with IAM Identity Center Authentication
 ###################################################
 
@@ -35,7 +52,7 @@ module "iam_identity_center" {
 
     customer_managed_query_result = {
       s3_bucket = {
-        name       = "tedilabs-terraform-aws-data-examples-athena-workgroup"
+        name       = module.bucket.name
         key_prefix = "athena-query-results/"
       }
       encryption = {

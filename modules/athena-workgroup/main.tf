@@ -89,10 +89,15 @@ resource "aws_athena_workgroup" "this" {
           kms_key = logging.value.managed.sse_kms_key
         }
 
-        s3_logging_configuration {
-          enabled      = logging.value.s3_bucket.enabled
-          log_location = logging.value.s3_bucket.location
-          kms_key      = logging.value.s3_bucket.sse_kms_key
+        dynamic "s3_logging_configuration" {
+          for_each = logging.value.s3_bucket.enabled ? [logging.value.s3_bucket] : []
+          iterator = config
+
+          content {
+            enabled      = config.value.enabled
+            log_location = config.value.location
+            kms_key      = config.value.sse_kms_key
+          }
         }
       }
     }
