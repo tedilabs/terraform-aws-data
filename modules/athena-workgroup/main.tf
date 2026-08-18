@@ -167,8 +167,7 @@ resource "aws_athena_workgroup" "this" {
     execution_role = (local.engine_type == "ATHENA_SQL" && var.iam_identity_center.enabled
       ? local.iam_identity_center_service_role
       : (local.engine_type == "APACHE_SPARK"
-        # TODO: Add IAM Role for APACHE_SPARK engine type
-        ? null
+        ? local.spark_execution_role
         : null
       )
     )
@@ -196,7 +195,7 @@ resource "aws_athena_workgroup" "this" {
 
     # For ATHENA_SQL engine types
     requester_pays_enabled         = local.engine_type == "ATHENA_SQL" ? var.query_on_s3_requester_pays_bucket_enabled : null
-    bytes_scanned_cutoff_per_query = var.per_query_data_usage_limit
+    bytes_scanned_cutoff_per_query = local.engine_type == "ATHENA_SQL" ? var.per_query_data_usage_limit : null
     enable_minimum_encryption_configuration = (local.engine_type == "ATHENA_SQL" && var.query_result.management_mode == "CUSTOMER_MANAGED"
       ? var.query_result.customer_managed_query_result.encryption.minimum_encryption_level_enforced
       : null

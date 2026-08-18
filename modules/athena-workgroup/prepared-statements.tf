@@ -6,6 +6,7 @@ resource "aws_athena_prepared_statement" "this" {
   for_each = {
     for statement in var.prepared_statements :
     statement.name => statement
+    if local.engine_type == "ATHENA_SQL"
   }
 
   region = var.region
@@ -26,6 +27,7 @@ resource "aws_athena_named_query" "this" {
   for_each = {
     for query in var.named_queries :
     "${query.database}:${query.name}" => query
+    if local.engine_type == "ATHENA_SQL"
   }
 
   region = var.region

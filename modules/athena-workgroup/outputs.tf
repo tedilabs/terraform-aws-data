@@ -143,6 +143,11 @@ output "iam_identity_center" {
   )
 }
 
+output "spark_execution_role" {
+  description = "The IAM Role used by Athena to access user resources in Apache Spark sessions."
+  value       = local.engine_type == "APACHE_SPARK" ? aws_athena_workgroup.this.configuration[0].execution_role : null
+}
+
 output "cloudwatch_metrics_enabled" {
   description = "Whether Amazon CloudWatch metrics are enabled for the workgroup."
   value       = var.cloudwatch_metrics_enabled
