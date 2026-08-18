@@ -43,6 +43,18 @@ module "role__iam_identity_center" {
   trusted_service_policies = [
     {
       services = ["athena.amazonaws.com"]
+      conditions = [
+        {
+          key       = "aws:SourceAccount"
+          condition = "StringEquals"
+          values    = [local.account_id]
+        },
+        {
+          key       = "aws:SourceArn"
+          condition = "ArnLike"
+          values    = [provider::aws::arn_build("aws", "athena", local.region, local.account_id, "workgroup/${var.name}")]
+        },
+      ]
     },
   ]
 
