@@ -116,6 +116,37 @@ variable "logging" {
   }
 }
 
+variable "default_spark_execution_role" {
+  description = <<EOF
+  (Optional) A configurations for default IAM Role to be used by Athena to access user resources in Apache Spark sessions. Use `spark_execution_role` if `default_spark_execution_role.enabled` is `false`. Only supported if you use Apache Spark engine types. A `default_spark_execution_role` block as defined below.
+    (Optional) `enabled` - Whether to create default IAM Role for Apache Spark workgroups. Defaults to `true`.
+    (Optional) `name` - The name of the IAM Role. If not provided, a name will be generated using the module name and instance name.
+    (Optional) `path` - The path for the IAM Role. Defaults to `/`.
+    (Optional) `description` - The description of the IAM Role. Defaults to `Managed by Terraform.`.
+    (Optional) `policies` - A list of IAM Policy ARNs to attach to the IAM Role. Defaults to an empty list.
+    (Optional) `inline_policies` - A map of names to inline policy documents to attach to the IAM Role. Defaults to an empty map.
+    (Optional) `permissions_boundary` - The ARN of the IAM policy to use as permissions boundary for the default IAM Role.
+  EOF
+  type = object({
+    enabled              = optional(bool, true)
+    name                 = optional(string)
+    path                 = optional(string, "/")
+    description          = optional(string, "Managed by Terraform.")
+    policies             = optional(list(string), [])
+    inline_policies      = optional(map(string), {})
+    permissions_boundary = optional(string)
+  })
+  default  = {}
+  nullable = false
+}
+
+variable "spark_execution_role" {
+  description = "(Optional) The Amazon Resource Name (ARN) of the IAM Role to be used by Athena to access user resources in Apache Spark sessions. Only supported if you use Apache Spark engine types. Only required if `default_spark_execution_role.enabled` is `false`."
+  type        = string
+  default     = null
+  nullable    = true
+}
+
 variable "query_result" {
   description = <<EOF
   (Optional) The configuration for query result location and encryption. Only required if you use Apache Spark engine types. `query_result` block as defined below.
@@ -143,7 +174,7 @@ variable "query_result" {
           `SSE_KMS` - Server-side encryption with KMS-managed keys.
           `CSE_KMS` - Client-side encryption with KMS-managed keys.
         (Optional) `kms_key` - The KMS key Amazon Resource Name (ARN) used to encrypt the query results. Required if `mode` is set to `SSE_KMS` or `CSE_KMS`.
-        (Optional) `minimum_encryption_level_enforced` - Whether to enforce minimum encryption level for query results. Defaults to `false`.
+        (Optional) `minimum_encryption_level_enforced` - Whether to enforce minimum encryption level for query results. Only effective when `override_client_config` is `false`, because the enforced workgroup configuration takes precedence over this flag. Defaults to `false`.
   EOF
   type = object({
     management_mode        = optional(string, "ATHENA_MANAGED")
@@ -280,7 +311,7 @@ variable "query_on_s3_requester_pays_bucket_enabled" {
 }
 
 variable "per_query_data_usage_limit" {
-  description = "(Optional) Sets the limit in bytes for the maximum amount of data a query is allowed to scan. You can set only one per query limit for a workgroup. The limit applies to all queries in the workgroup and if query exceeds the limit, it will be cancelled. Minimum limit is 10 MB and maximum limit is 7EB per workgroup."
+  description = "(Optional) Sets the limit in bytes for the maximum amount of data a query is allowed to scan. You can set only one per query limit for a workgroup. The limit applies to all queries in the workgroup and if query exceeds the limit, it will be cancelled. Minimum limit is 10 MB and maximum limit is 7EB per workgroup. Only supported if you use Athena SQL engine types."
   type        = number
   default     = null
   nullable    = true
@@ -288,7 +319,7 @@ variable "per_query_data_usage_limit" {
 
 variable "prepared_statements" {
   description = <<EOF
-  (Optional) A list of prepared statements to reuse later. A `prepared_statements` block as defined below.
+  (Optional) A list of prepared statements to reuse later. Only supported if you use Athena SQL engine types. A `prepared_statements` block as defined below.
     (Required) `name` - The name of the prepared statement. Maximum length of 256.
     (Optional) `description` - A brief explanation of the prepared statements. Defaults to `Managed by Terraform.`.
     (Required) `query` - The query string for the prepared statement.
@@ -305,7 +336,7 @@ variable "prepared_statements" {
 
 variable "named_queries" {
   description = <<EOF
-  (Optional) A list of named queries to reuse later. A `named_queries` block as defined below.
+  (Optional) A list of named queries to reuse later. Only supported if you use Athena SQL engine types. A `named_queries` block as defined below.
     (Required) `name` - The plain language name for the query. Maximum length of 128.
     (Optional) `description` - A brief explanation of the query. Defaults to `Managed by Terraform.`.
     (Required) `database` - The database to which the query belongs.

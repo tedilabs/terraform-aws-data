@@ -11,6 +11,15 @@ locals {
     ? one(module.role__iam_identity_center[*].arn)
     : var.iam_identity_center.service_role
   )
+  spark_execution_role = (local.engine_type == "APACHE_SPARK" && var.default_spark_execution_role.enabled
+    ? one(module.role__spark[*].arn)
+    : var.spark_execution_role
+  )
+  spark_kms_keys = compact([
+    var.customer_content_encryption.enabled ? var.customer_content_encryption.kms_key : null,
+    var.logging.managed.sse_kms_key,
+    var.logging.s3_bucket.sse_kms_key,
+  ])
 }
 
 
@@ -46,6 +55,60 @@ module "role__iam_identity_center" {
   )
 
   permissions_boundary = var.iam_identity_center.default_service_role.permissions_boundary
+
+  force_detach_policies = true
+  resource_group = {
+    enabled = false
+  }
+  module_tags_enabled = false
+
+  tags = merge(
+    local.module_tags,
+    var.tags,
+  )
+}
+
+
+module "role__spark" {
+  count = (local.engine_type == "APACHE_SPARK" && var.default_spark_execution_role.enabled) ? 1 : 0
+
+  source  = "tedilabs/account/aws//modules/iam-role"
+  version = "~> 0.33.0"
+
+  name = coalesce(
+    var.default_spark_execution_role.name,
+    "athena-workgroup-spark-${local.metadata.name}",
+  )
+  path        = var.default_spark_execution_role.path
+  description = var.default_spark_execution_role.description
+
+  trusted_service_policies = [
+    {
+      services = ["athena.amazonaws.com"]
+      conditions = [
+        {
+          key       = "aws:SourceAccount"
+          condition = "StringEquals"
+          values    = [local.account_id]
+        },
+        {
+          key       = "aws:SourceArn"
+          condition = "ArnLike"
+          values    = [provider::aws::arn_build("aws", "athena", local.region, local.account_id, "workgroup/${var.name}")]
+        },
+      ]
+    },
+  ]
+
+  policies = var.default_spark_execution_role.policies
+  inline_policies = merge(
+    {
+      "spark" = data.aws_iam_policy_document.spark[0].json
+    },
+    var.default_spark_execution_role.inline_policies
+  )
+
+  permissions_boundary = var.default_spark_execution_role.permissions_boundary
 
   force_detach_policies = true
   resource_group = {
@@ -183,6 +246,115 @@ data "aws_iam_policy_document" "iam_identity_center" {
       test     = "StringEquals"
       variable = "aws:ResourceAccount"
       values   = [local.account_id]
+    }
+  }
+}
+
+data "aws_iam_policy_document" "spark" {
+  count = (local.engine_type == "APACHE_SPARK" && var.default_spark_execution_role.enabled) ? 1 : 0
+
+  statement {
+    sid = "Athena"
+
+    effect = "Allow"
+    actions = [
+      "athena:GetWorkGroup",
+      "athena:CreatePresignedNotebookUrl",
+      "athena:TerminateSession",
+      "athena:GetSession",
+      "athena:GetSessionStatus",
+      "athena:ListSessions",
+      "athena:StartCalculationExecution",
+      "athena:GetCalculationExecutionCode",
+      "athena:StopCalculationExecution",
+      "athena:ListCalculationExecutions",
+      "athena:GetCalculationExecution",
+      "athena:GetCalculationExecutionStatus",
+      "athena:ListExecutors",
+      "athena:ExportNotebook",
+      "athena:UpdateNotebook",
+    ]
+    resources = [
+      provider::aws::arn_build("aws", "athena", local.region, local.account_id, "workgroup/${var.name}"),
+    ]
+
+    condition {
+      test     = "StringEquals"
+      variable = "aws:ResourceAccount"
+      values   = [local.account_id]
+    }
+  }
+
+  statement {
+    sid = "CloudWatchLogs"
+
+    effect = "Allow"
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:DescribeLogStreams",
+      "logs:PutLogEvents",
+    ]
+    resources = concat(
+      [
+        provider::aws::arn_build("aws", "logs", local.region, local.account_id, "log-group:/aws-athena:*"),
+        provider::aws::arn_build("aws", "logs", local.region, local.account_id, "log-group:/aws-athena*:log-stream:*"),
+      ],
+      (var.logging.cloudwatch.log_group != null
+        ? [
+          provider::aws::arn_build("aws", "logs", local.region, local.account_id, "log-group:${var.logging.cloudwatch.log_group}:*"),
+          provider::aws::arn_build("aws", "logs", local.region, local.account_id, "log-group:${var.logging.cloudwatch.log_group}:log-stream:*"),
+        ]
+        : []
+      )
+    )
+  }
+
+  statement {
+    sid = "CloudWatchLogGroups"
+
+    effect = "Allow"
+    actions = [
+      "logs:DescribeLogGroups",
+    ]
+    resources = [
+      provider::aws::arn_build("aws", "logs", local.region, local.account_id, "log-group:*"),
+    ]
+  }
+
+  statement {
+    sid = "CloudWatchMetrics"
+
+    effect = "Allow"
+    actions = [
+      "cloudwatch:PutMetricData",
+    ]
+    resources = [
+      "*",
+    ]
+
+    condition {
+      test     = "StringEquals"
+      variable = "cloudwatch:namespace"
+      values   = ["AmazonAthenaForApacheSpark"]
+    }
+  }
+
+  dynamic "statement" {
+    for_each = length(local.spark_kms_keys) > 0 ? ["go"] : []
+
+    content {
+      sid = "KMS"
+
+      effect = "Allow"
+      actions = [
+        "kms:Encrypt",
+        "kms:Decrypt",
+        "kms:ReEncrypt*",
+        "kms:GenerateDataKey*",
+        "kms:DescribeKey",
+      ]
+      resources = local.spark_kms_keys
     }
   }
 }
