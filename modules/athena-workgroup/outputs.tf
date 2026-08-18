@@ -66,9 +66,10 @@ output "query_result" {
             bucket_owner_full_control_enabled = one(aws_athena_workgroup.this.configuration[0].result_configuration[0].acl_configuration) != null
           }
           encryption = {
-            enabled = one(aws_athena_workgroup.this.configuration[0].result_configuration[0].encryption_configuration) != null
-            mode    = one(aws_athena_workgroup.this.configuration[0].result_configuration[0].encryption_configuration[*].encryption_option)
-            kms_key = one(aws_athena_workgroup.this.configuration[0].result_configuration[0].encryption_configuration[*].kms_key_arn)
+            enabled                           = one(aws_athena_workgroup.this.configuration[0].result_configuration[0].encryption_configuration) != null
+            mode                              = one(aws_athena_workgroup.this.configuration[0].result_configuration[0].encryption_configuration[*].encryption_option)
+            kms_key                           = one(aws_athena_workgroup.this.configuration[0].result_configuration[0].encryption_configuration[*].kms_key_arn)
+            minimum_encryption_level_enforced = aws_athena_workgroup.this.configuration[0].enable_minimum_encryption_configuration
           }
         }
         : null

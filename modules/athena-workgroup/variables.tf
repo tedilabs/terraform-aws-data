@@ -72,6 +72,7 @@ variable "query_result" {
           `SSE_KMS` - Server-side encryption with KMS-managed keys.
           `CSE_KMS` - Client-side encryption with KMS-managed keys.
         (Optional) `kms_key` - The KMS key Amazon Resource Name (ARN) used to encrypt the query results. Required if `mode` is set to `SSE_KMS` or `CSE_KMS`.
+        (Optional) `minimum_encryption_level_enforced` - Whether to enforce minimum encryption level for query results. Defaults to `false`.
   EOF
   type = object({
     management_mode        = optional(string, "ATHENA_MANAGED")
@@ -89,9 +90,10 @@ variable "query_result" {
         bucket_owner_full_control_enabled = optional(bool, false)
       })
       encryption = optional(object({
-        enabled = optional(bool, false)
-        mode    = optional(string, "SSE_S3")
-        kms_key = optional(string, null)
+        enabled                           = optional(bool, false)
+        mode                              = optional(string, "SSE_S3")
+        kms_key                           = optional(string, null)
+        minimum_encryption_level_enforced = optional(bool, false)
       }), {})
     }))
   })
@@ -190,6 +192,7 @@ variable "per_query_data_usage_limit" {
   description = "(Optional) Sets the limit in bytes for the maximum amount of data a query is allowed to scan. You can set only one per query limit for a workgroup. The limit applies to all queries in the workgroup and if query exceeds the limit, it will be cancelled. Minimum limit is 10 MB and maximum limit is 7EB per workgroup."
   type        = number
   default     = null
+  nullable    = true
 }
 
 variable "prepared_statements" {

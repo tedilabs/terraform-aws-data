@@ -15,7 +15,7 @@ locals {
 }
 
 data "aws_ssoadmin_instances" "default" {
-  count = local.engine_type == "ATHENA_SQL" && var.iam_identity_center.enabled && (var.iam_identity_center.instance == null || var.iam_identity_center.instance == "") ? 1 : 0
+  count = local.engine_type == "ATHENA_SQL" && var.iam_identity_center.enabled && var.iam_identity_center.instance == null ? 1 : 0
 
   region = var.region
 }
@@ -80,6 +80,7 @@ resource "aws_athena_workgroup" "this" {
       }
     }
 
+    # TODO: Result Configuration for APACHE_SPARK engine type
     dynamic "result_configuration" {
       for_each = local.engine_type == "ATHENA_SQL" && var.query_result.management_mode == "CUSTOMER_MANAGED" ? [var.query_result.customer_managed_query_result] : []
       iterator = config
@@ -127,9 +128,9 @@ resource "aws_athena_workgroup" "this" {
 
       content {
         enable_identity_center = config.value.enabled
-        identity_center_instance_arn = (length(data.aws_ssoadmin_instances.default) > 0
-          ? data.aws_ssoadmin_instances.default[0].arns[0]
-          : config.value.instance
+        identity_center_instance_arn = (config.value.instance != null
+          ? config.value.instance
+          : one(data.aws_ssoadmin_instances.default[*].arns[0])
         )
       }
     }
@@ -143,6 +144,10 @@ resource "aws_athena_workgroup" "this" {
     # For ATHENA_SQL engine types
     requester_pays_enabled         = local.engine_type == "ATHENA_SQL" ? var.query_on_s3_requester_pays_bucket_enabled : null
     bytes_scanned_cutoff_per_query = var.per_query_data_usage_limit
+    enable_minimum_encryption_configuration = (local.engine_type == "ATHENA_SQL" && var.query_result.management_mode == "CUSTOMER_MANAGED"
+      ? var.query_result.customer_managed_query_result.encryption.minimum_encryption_level_enforced
+      : null
+    )
 
 
     # For APACHE_SPARK engine types
