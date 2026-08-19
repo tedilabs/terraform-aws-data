@@ -50,22 +50,15 @@ module "pyspark" {
     kms_key = aws_kms_key.this.arn
   }
 
-  logging = {
-    cloudwatch = {
-      enabled                = true
-      log_group              = "/aws/athena/sessions/pyspark"
-      log_stream_name_prefix = "session-"
-      log_types = {
-        "SPARK_DRIVER" = ["STDOUT", "STDERR"]
-      }
-    }
-    managed = {
-      enabled     = true
-      sse_kms_key = aws_kms_key.this.arn
-    }
+  calculation_result = {
     s3_bucket = {
-      enabled  = true
-      location = "s3://${module.bucket.name}/athena-spark-logs/"
+      name       = module.bucket.name
+      key_prefix = "athena-calculation-results/pyspark/"
+    }
+    encryption = {
+      enabled = true
+      mode    = "SSE_KMS"
+      kms_key = aws_kms_key.this.arn
     }
   }
 
@@ -98,8 +91,21 @@ module "spark" {
   }
 
   logging = {
+    cloudwatch = {
+      enabled                = true
+      log_group              = "/aws/athena/sessions/spark"
+      log_stream_name_prefix = "session-"
+      log_types = {
+        "SPARK_DRIVER" = ["STDOUT", "STDERR"]
+      }
+    }
     managed = {
-      enabled = true
+      enabled     = true
+      sse_kms_key = aws_kms_key.this.arn
+    }
+    s3_bucket = {
+      enabled  = true
+      location = "s3://${module.bucket.name}/athena-spark-logs/"
     }
   }
 

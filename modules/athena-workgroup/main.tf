@@ -65,7 +65,7 @@ resource "aws_athena_workgroup" "this" {
     }
 
     dynamic "monitoring_configuration" {
-      for_each = local.engine_type == "APACHE_SPARK" ? [var.logging] : []
+      for_each = var.analytics_engine.version == "SPARK_V3.5" ? [var.logging] : []
       iterator = logging
 
       content {
@@ -138,7 +138,6 @@ resource "aws_athena_workgroup" "this" {
       }
     }
 
-    # TODO: Result Configuration for APACHE_SPARK engine type
     dynamic "result_configuration" {
       for_each = local.engine_type == "ATHENA_SQL" && var.query_result.management_mode == "CUSTOMER_MANAGED" ? [var.query_result.customer_managed_query_result] : []
       iterator = config
@@ -162,6 +161,27 @@ resource "aws_athena_workgroup" "this" {
           content {
             encryption_option = encryption.value.mode
             kms_key_arn       = contains(["SSE_KMS", "CSE_KMS"], encryption.value.mode) ? encryption.value.kms_key : null
+          }
+        }
+      }
+    }
+
+
+    ## Calculation Result (for APACHE_SPARK engine types)
+    dynamic "result_configuration" {
+      for_each = var.analytics_engine.version == "PYSPARK_V3" && var.calculation_result.s3_bucket != null ? [var.calculation_result] : []
+      iterator = config
+
+      content {
+        output_location = "s3://${config.value.s3_bucket.name}/${config.value.s3_bucket.key_prefix}"
+
+        dynamic "encryption_configuration" {
+          for_each = config.value.encryption.enabled ? [config.value.encryption] : []
+          iterator = encryption
+
+          content {
+            encryption_option = encryption.value.mode
+            kms_key_arn       = encryption.value.mode == "SSE_KMS" ? encryption.value.kms_key : null
           }
         }
       }

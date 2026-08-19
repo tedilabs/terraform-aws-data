@@ -54,7 +54,7 @@ output "customer_content_encryption" {
 
 output "logging" {
   description = "The configuration for logging of Apache Spark workgroups."
-  value = (local.engine_type == "APACHE_SPARK"
+  value = (var.analytics_engine.version == "SPARK_V3.5"
     ? {
       cloudwatch = {
         enabled                = try(aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].cloud_watch_logging_configuration[0].enabled, false)
@@ -120,6 +120,25 @@ output "query_result" {
         }
         : null
       )
+    }
+    : null
+  )
+}
+
+output "calculation_result" {
+  description = "The configuration for calculation result location and encryption of Apache Spark workgroups."
+  value = (var.analytics_engine.version == "PYSPARK_V3"
+    ? {
+      s3_bucket = {
+        uri        = aws_athena_workgroup.this.configuration[0].result_configuration[0].output_location
+        name       = var.calculation_result.s3_bucket.name
+        key_prefix = var.calculation_result.s3_bucket.key_prefix
+      }
+      encryption = {
+        enabled = one(aws_athena_workgroup.this.configuration[0].result_configuration[0].encryption_configuration) != null
+        mode    = one(aws_athena_workgroup.this.configuration[0].result_configuration[0].encryption_configuration[*].encryption_option)
+        kms_key = one(aws_athena_workgroup.this.configuration[0].result_configuration[0].encryption_configuration[*].kms_key_arn)
+      }
     }
     : null
   )
