@@ -144,7 +144,7 @@ variable "calculation_result" {
     encryption = optional(object({
       enabled = optional(bool, false)
       mode    = optional(string, "SSE_S3")
-      kms_key = optional(string, null)
+      kms_key = optional(string)
     }), {})
   })
   default  = {}
@@ -271,7 +271,7 @@ variable "query_result" {
       encryption = optional(object({
         enabled                           = optional(bool, false)
         mode                              = optional(string, "SSE_S3")
-        kms_key                           = optional(string, null)
+        kms_key                           = optional(string)
         minimum_encryption_level_enforced = optional(bool, false)
       }), {})
     }))
