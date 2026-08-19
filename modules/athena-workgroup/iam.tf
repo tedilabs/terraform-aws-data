@@ -60,9 +60,7 @@ module "role__iam_identity_center" {
       ]
     },
   ]
-  # INFO: The trust policy of the service role requires the `sts:SetContext`
-  # action to allow Athena to create identity-enhanced sessions for the IAM
-  # Identity Center users with trusted identity propagation.
+  # INFO: The trust policy of the service role requires the `sts:SetContext` action to allow Athena to create identity-enhanced sessions for the IAM Identity Center users with trusted identity propagation.
   trusted_session_context = {
     enabled = true
     allowed_context_providers = [
