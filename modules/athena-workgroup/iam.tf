@@ -34,7 +34,7 @@ module "role__iam_identity_center" {
   count = (var.iam_identity_center.enabled && var.iam_identity_center.default_service_role.enabled) ? 1 : 0
 
   source  = "tedilabs/account/aws//modules/iam-role"
-  version = "~> 0.33.0"
+  version = "~> 0.33.11"
 
   name = coalesce(
     var.iam_identity_center.default_service_role.name,
@@ -60,6 +60,15 @@ module "role__iam_identity_center" {
       ]
     },
   ]
+  # INFO: The trust policy of the service role requires the `sts:SetContext`
+  # action to allow Athena to create identity-enhanced sessions for the IAM
+  # Identity Center users with trusted identity propagation.
+  trusted_session_context = {
+    enabled = true
+    allowed_context_providers = [
+      "arn:aws:iam::aws:contextProvider/IdentityCenter",
+    ]
+  }
 
   policies = var.iam_identity_center.default_service_role.policies
   inline_policies = merge(

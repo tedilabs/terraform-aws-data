@@ -25,7 +25,7 @@ This module creates following resources.
 | Name | Source | Version |
 | ---- | ------ | ------- |
 | <a name="module_resource_group"></a> [resource\_group](#module\_resource\_group) | tedilabs/misc/aws//modules/resource-group | ~> 0.12.0 |
-| <a name="module_role__iam_identity_center"></a> [role\_\_iam\_identity\_center](#module\_role\_\_iam\_identity\_center) | tedilabs/account/aws//modules/iam-role | ~> 0.33.0 |
+| <a name="module_role__iam_identity_center"></a> [role\_\_iam\_identity\_center](#module\_role\_\_iam\_identity\_center) | tedilabs/account/aws//modules/iam-role | ~> 0.33.11 |
 | <a name="module_role__spark"></a> [role\_\_spark](#module\_role\_\_spark) | tedilabs/account/aws//modules/iam-role | ~> 0.33.0 |
 
 ## Resources
