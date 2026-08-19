@@ -73,7 +73,7 @@ variable "customer_content_encryption" {
 
 variable "logging" {
   description = <<EOF
-  (Optional) A configurations for logging of Apache Spark workgroups. Only supported if you use Apache Spark engine types. A `logging` block as defined below.
+  (Optional) A configurations for logging of Apache Spark workgroups. Only supported if `analytics_engine.version` is `SPARK_V3.5`. A `logging` block as defined below.
     (Optional) `cloudwatch` - A configurations for delivering logs to Amazon CloudWatch Logs. `cloudwatch` as defined below.
       (Optional) `enabled` - Whether to enable CloudWatch logging. Defaults to `false`.
       (Optional) `log_group` - The name of the CloudWatch log group.
@@ -113,6 +113,78 @@ variable "logging" {
       var.logging.s3_bucket.enabled && startswith(var.logging.s3_bucket.location, "s3://"),
     ])
     error_message = "`logging.s3_bucket.location` is required and must start with `s3://` when `logging.s3_bucket.enabled` is `true`."
+  }
+  validation {
+    condition = anytrue([
+      var.analytics_engine.version == "SPARK_V3.5",
+      !var.logging.cloudwatch.enabled && !var.logging.s3_bucket.enabled,
+    ])
+    error_message = "`logging` is only supported if `analytics_engine.version` is `SPARK_V3.5`."
+  }
+}
+
+variable "calculation_result" {
+  description = <<EOF
+  (Optional) A configurations for calculation result of Apache Spark workgroups. Only supported and required if `analytics_engine.version` is `PYSPARK_V3`. Apache Spark version 3.5 workgroups manage calculation results with managed storage instead. A `calculation_result` block as defined below.
+    (Required) `s3_bucket` - A configurations for S3 bucket used to store the calculation result. `s3_bucket` as defined below.
+      (Required) `name` - The name of the S3 bucket used to store the calculation result.
+      (Required) `key_prefix` - The key prefix for the specified S3 bucket.
+    (Optional) `encryption` - A configurations for encryption of the calculation result. `encryption` as defined below.
+      (Optional) `enabled` - Whether to encrypt calculation results on S3 bucket. Defaults to `false`.
+      (Optional) `mode` - The encryption mode to use. Valid values are `SSE_S3` and `SSE_KMS`. Defaults to `SSE_S3`.
+        `SSE_S3` - Server-side encryption with Amazon S3-managed keys.
+        `SSE_KMS` - Server-side encryption with KMS-managed keys.
+      (Optional) `kms_key` - The KMS key Amazon Resource Name (ARN) used to encrypt the calculation results. Required if `mode` is set to `SSE_KMS`.
+  EOF
+  type = object({
+    s3_bucket = optional(object({
+      name       = string
+      key_prefix = string
+    }))
+    encryption = optional(object({
+      enabled = optional(bool, false)
+      mode    = optional(string, "SSE_S3")
+      kms_key = optional(string)
+    }), {})
+  })
+  default  = {}
+  nullable = false
+
+  validation {
+    condition = anytrue([
+      var.analytics_engine.version != "PYSPARK_V3",
+      var.calculation_result.s3_bucket != null,
+    ])
+    error_message = "`calculation_result.s3_bucket` is required if `analytics_engine.version` is `PYSPARK_V3`."
+  }
+  validation {
+    condition = anytrue([
+      var.analytics_engine.version == "PYSPARK_V3",
+      var.calculation_result.s3_bucket == null,
+    ])
+    error_message = "`calculation_result` is only supported if `analytics_engine.version` is `PYSPARK_V3`."
+  }
+  validation {
+    condition = anytrue([
+      var.calculation_result.s3_bucket == null,
+      (var.calculation_result.s3_bucket != null
+        && !startswith(var.calculation_result.s3_bucket.key_prefix, "/")
+      )
+    ])
+    error_message = "`s3_bucket.key_prefix` cannot start with `/`."
+  }
+  validation {
+    condition = anytrue([
+      var.calculation_result.s3_bucket == null,
+      (var.calculation_result.s3_bucket != null
+        && endswith(var.calculation_result.s3_bucket.key_prefix, "/")
+      )
+    ])
+    error_message = "`s3_bucket.key_prefix` must end with `/`."
+  }
+  validation {
+    condition     = contains(["SSE_S3", "SSE_KMS"], var.calculation_result.encryption.mode)
+    error_message = "Valid values for `encryption.mode` are `SSE_S3` and `SSE_KMS`."
   }
 }
 
@@ -199,7 +271,7 @@ variable "query_result" {
       encryption = optional(object({
         enabled                           = optional(bool, false)
         mode                              = optional(string, "SSE_S3")
-        kms_key                           = optional(string, null)
+        kms_key                           = optional(string)
         minimum_encryption_level_enforced = optional(bool, false)
       }), {})
     }))

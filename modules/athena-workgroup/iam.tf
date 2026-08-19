@@ -19,6 +19,7 @@ locals {
     var.customer_content_encryption.enabled ? var.customer_content_encryption.kms_key : null,
     var.logging.managed.sse_kms_key,
     var.logging.s3_bucket.sse_kms_key,
+    var.calculation_result.encryption.enabled ? var.calculation_result.encryption.kms_key : null,
   ])
   spark_logging_s3_path   = trimsuffix(trimprefix(var.logging.s3_bucket.location, "s3://"), "/")
   spark_logging_s3_bucket = split("/", local.spark_logging_s3_path)[0]
@@ -296,6 +297,27 @@ data "aws_iam_policy_document" "spark" {
       test     = "StringEquals"
       variable = "aws:ResourceAccount"
       values   = [local.account_id]
+    }
+  }
+
+  dynamic "statement" {
+    for_each = var.analytics_engine.version == "PYSPARK_V3" ? [var.calculation_result.s3_bucket] : []
+    iterator = config
+
+    content {
+      sid = "S3CalculationResult"
+
+      effect = "Allow"
+      actions = [
+        "s3:GetBucketLocation",
+        "s3:ListBucket",
+        "s3:GetObject",
+        "s3:PutObject",
+      ]
+      resources = [
+        provider::aws::arn_build("aws", "s3", "", "", config.value.name),
+        provider::aws::arn_build("aws", "s3", "", "", "${config.value.name}/${config.value.key_prefix}*"),
+      ]
     }
   }
 

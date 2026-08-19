@@ -54,25 +54,25 @@ output "customer_content_encryption" {
 
 output "logging" {
   description = "The configuration for logging of Apache Spark workgroups."
-  value = (local.engine_type == "APACHE_SPARK"
+  value = (var.analytics_engine.version == "SPARK_V3.5"
     ? {
       cloudwatch = {
-        enabled                = aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].cloud_watch_logging_configuration[0].enabled
-        log_group              = aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].cloud_watch_logging_configuration[0].log_group
-        log_stream_name_prefix = aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].cloud_watch_logging_configuration[0].log_stream_name_prefix
+        enabled                = try(aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].cloud_watch_logging_configuration[0].enabled, false)
+        log_group              = try(aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].cloud_watch_logging_configuration[0].log_group, null)
+        log_stream_name_prefix = try(aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].cloud_watch_logging_configuration[0].log_stream_name_prefix, null)
         log_types = {
-          for log_type in aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].cloud_watch_logging_configuration[0].log_type :
+          for log_type in try(aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].cloud_watch_logging_configuration[0].log_type, []) :
           log_type.key => log_type.values
         }
       }
       managed = {
-        enabled     = aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].managed_logging_configuration[0].enabled
-        sse_kms_key = aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].managed_logging_configuration[0].kms_key
+        enabled     = try(aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].managed_logging_configuration[0].enabled, true)
+        sse_kms_key = try(aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].managed_logging_configuration[0].kms_key, null)
       }
       s3_bucket = {
-        enabled     = aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].s3_logging_configuration[0].enabled
-        location    = aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].s3_logging_configuration[0].log_location
-        sse_kms_key = aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].s3_logging_configuration[0].kms_key
+        enabled     = try(aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].s3_logging_configuration[0].enabled, false)
+        location    = try(aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].s3_logging_configuration[0].log_location, null)
+        sse_kms_key = try(aws_athena_workgroup.this.configuration[0].monitoring_configuration[0].s3_logging_configuration[0].kms_key, null)
       }
     }
     : null
@@ -120,6 +120,25 @@ output "query_result" {
         }
         : null
       )
+    }
+    : null
+  )
+}
+
+output "calculation_result" {
+  description = "The configuration for calculation result location and encryption of Apache Spark workgroups."
+  value = (var.analytics_engine.version == "PYSPARK_V3"
+    ? {
+      s3_bucket = {
+        uri        = aws_athena_workgroup.this.configuration[0].result_configuration[0].output_location
+        name       = var.calculation_result.s3_bucket.name
+        key_prefix = var.calculation_result.s3_bucket.key_prefix
+      }
+      encryption = {
+        enabled = one(aws_athena_workgroup.this.configuration[0].result_configuration[0].encryption_configuration) != null
+        mode    = one(aws_athena_workgroup.this.configuration[0].result_configuration[0].encryption_configuration[*].encryption_option)
+        kms_key = one(aws_athena_workgroup.this.configuration[0].result_configuration[0].encryption_configuration[*].kms_key_arn)
+      }
     }
     : null
   )
