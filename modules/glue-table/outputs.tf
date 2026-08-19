@@ -43,6 +43,46 @@ output "type" {
   value       = aws_glue_catalog_table.this.table_type
 }
 
+output "location" {
+  description = "The physical location of the table."
+  value       = one(aws_glue_catalog_table.this.storage_descriptor[*].location)
+}
+
+output "input_format" {
+  description = "Absolute class name of the Hadoop `InputFormat` to use when reading table files."
+  value       = one(aws_glue_catalog_table.this.storage_descriptor[*].input_format)
+}
+
+output "output_format" {
+  description = "Absolute class name of the Hadoop `OutputFormat` to use when writing table files."
+  value       = one(aws_glue_catalog_table.this.storage_descriptor[*].output_format)
+}
+
+output "compressed" {
+  description = "Whether the data in the table is compressed."
+  value       = one(aws_glue_catalog_table.this.storage_descriptor[*].compressed)
+}
+
+output "columns" {
+  description = "A list of the configurations for columns in the table."
+  value       = one(aws_glue_catalog_table.this.storage_descriptor[*].columns)
+}
+
+output "ser_de" {
+  description = "The configuration of the SerDe (Serializer/Deserializer) of the table."
+  value       = one(aws_glue_catalog_table.this.storage_descriptor[0].ser_de_info[*])
+}
+
+output "partition_keys" {
+  description = "A list of columns by which the table is partitioned."
+  value       = aws_glue_catalog_table.this.partition_keys
+}
+
+output "parameters" {
+  description = "The properties associated with this table, as a map of key-value pairs."
+  value       = aws_glue_catalog_table.this.parameters
+}
+
 output "sharing" {
   description = <<EOF
   The configuration for sharing of the Glue Table.

@@ -56,6 +56,127 @@ variable "type" {
   # }
 }
 
+variable "location" {
+  description = "(Optional) The physical location of the table. By default, this takes the form of the warehouse location, followed by the database location in the warehouse, followed by the table name."
+  type        = string
+  default     = null
+  nullable    = true
+}
+
+variable "input_format" {
+  description = <<EOF
+  (Optional) Absolute class name of the Hadoop `InputFormat` to use when reading table files. Supported values are following:
+    `org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat` - InputFormat for Avro files.
+    `com.amazon.emr.cloudtrail.CloudTrailInputFormat` - InputFormat for Cloudtrail Logs.
+    `org.apache.hadoop.hive.ql.io.orc.OrcInputFormat` - InputFormat for Orc files.
+    `org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat` - InputFormat for Parquet files.
+    `org.apache.hadoop.mapred.TextInputFormat` - An InputFormat for plain text files. Files are broken into lines. Either linefeed or carriage-return are used to signal end of line. Keys are the position in the file, and values are the line of text. JSON & CSV files are examples of this InputFormat.
+  EOF
+  type        = string
+  default     = ""
+  nullable    = false
+
+  validation {
+    condition = contains([
+      "",
+      "org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat",
+      "com.amazon.emr.cloudtrail.CloudTrailInputFormat",
+      "org.apache.hadoop.hive.ql.io.orc.OrcInputFormat",
+      "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+      "org.apache.hadoop.mapred.TextInputFormat",
+    ], var.input_format)
+    error_message = "Supported values for `input_format` are `org.apache.hadoop.hive.ql.io.avro.AvroContainerInputFormat`, `com.amazon.emr.cloudtrail.CloudTrailInputFormat`, `org.apache.hadoop.hive.ql.io.orc.OrcInputFormat`, `org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat`, `org.apache.hadoop.mapred.TextInputFormat`."
+  }
+}
+
+variable "output_format" {
+  description = <<EOF
+  (Optional) Absolute class name of the Hadoop `OutputFormat` to use when writing table files. Supported values are following:
+    `org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat` - Writes text data with a null key (value only).
+    `org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat` - OutputFormat for Avro files.
+    `org.apache.hadoop.hive.ql.io.orc.OrcOutputFormat` - OutputFormat for Orc files.
+    `org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat` - OutputFormat for Parquet files.
+  EOF
+  type        = string
+  default     = ""
+  nullable    = false
+
+  validation {
+    condition = contains([
+      "",
+      "org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat",
+      "org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat",
+      "org.apache.hadoop.hive.ql.io.orc.OrcOutputFormat",
+      "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
+    ], var.output_format)
+    error_message = "Supported values for `output_format` are `org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat`, `org.apache.hadoop.hive.ql.io.avro.AvroContainerOutputFormat`, `org.apache.hadoop.hive.ql.io.orc.OrcOutputFormat`, `org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat`."
+  }
+}
+
+variable "compressed" {
+  description = "(Optional) Whether the data in the table is compressed. Defaults to `false`."
+  type        = bool
+  default     = false
+  nullable    = false
+}
+
+variable "columns" {
+  description = <<EOF
+  (Optional) A list of the configurations for columns in the table. Each item of `columns` as defined below.
+    (Required) `name` - The name of the Column.
+    (Required) `type` - The data type of the Column.
+    (Optional) `comment` - A free-form text comment.
+    (Optional) `parameters` - A properties associated with the column, as a map of key-value pairs.
+  EOF
+  type = list(object({
+    name       = string
+    type       = string
+    comment    = optional(string, "")
+    parameters = optional(map(string), {})
+  }))
+  default  = []
+  nullable = false
+}
+
+variable "ser_de" {
+  description = <<EOF
+  (Optional) A configuration of the SerDe (Serializer/Deserializer) of the table. `ser_de` as defined below.
+    (Optional) `name` - The name of the SerDe.
+    (Optional) `serialization_library` - Absolute class name of the SerDe library, which is used by the table for serialization and deserialization of rows. For example, `org.openx.data.jsonserde.JsonSerDe`.
+    (Optional) `parameters` - A map of initialization parameters for the SerDe, in key-value form.
+  EOF
+  type = object({
+    name                  = optional(string)
+    serialization_library = optional(string)
+    parameters            = optional(map(string), {})
+  })
+  default  = {}
+  nullable = false
+}
+
+variable "partition_keys" {
+  description = <<EOF
+  (Optional) A list of columns by which the table is partitioned. Only primitive types are supported as partition keys. Each item of `partition_keys` as defined below.
+    (Required) `name` - The name of the partition key.
+    (Required) `type` - The data type of the partition key.
+    (Optional) `comment` - A free-form text comment.
+  EOF
+  type = list(object({
+    name    = string
+    type    = string
+    comment = optional(string, "")
+  }))
+  default  = []
+  nullable = false
+}
+
+variable "parameters" {
+  description = "(Optional) A properties associated with this table, as a map of key-value pairs."
+  type        = map(string)
+  default     = {}
+  nullable    = false
+}
+
 variable "tags" {
   description = "(Optional) A map of tags to add to all resources."
   type        = map(string)
