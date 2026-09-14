@@ -33,3 +33,8 @@
 - changed-files:
   - any-glob-to-any-file:
     - modules/glue-table/**/*
+
+":floppy_disk: lakeformation-data-catalog":
+- changed-files:
+  - any-glob-to-any-file:
+    - modules/lakeformation-data-catalog/**/*
