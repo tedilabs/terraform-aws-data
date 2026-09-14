@@ -19,31 +19,18 @@ locals {
 # Glue Table
 ###################################################
 
-# - owner
-# - parameters
 # - partition_index
 #   - index_name
 #   - keys
-# - partition_keys
-#   - comment
-#   - name
-#   - type
 # - retention
 # - storage_descriptor
 #   - bucket_columns
-#   - columns
-#   - compressed
-#   - input_format
-#   - location
 #   - number_of_buckets
-#   - output_format
 #   - parameters
 #   - schema_reference
-#   - ser_de_info
 #   - skewed_info
 #   - sort_columns
 #   - stored_as_sub_directories
-# - table_type
 # - target_table
 #   - catalog_id
 #   - database_name
@@ -60,4 +47,50 @@ resource "aws_glue_catalog_table" "this" {
   name        = var.name
   description = var.description
   table_type  = var.type
+
+  dynamic "partition_keys" {
+    for_each = var.partition_keys
+    iterator = key
+
+    content {
+      name    = key.value.name
+      type    = key.value.type
+      comment = key.value.comment
+    }
+  }
+
+  storage_descriptor {
+    location      = var.location
+    input_format  = var.input_format != "" ? var.input_format : null
+    output_format = var.output_format != "" ? var.output_format : null
+    compressed    = var.compressed
+
+    dynamic "columns" {
+      for_each = var.columns
+      iterator = column
+
+      content {
+        name = column.value.name
+        type = column.value.type
+
+        comment    = column.value.comment
+        parameters = column.value.parameters
+      }
+    }
+
+    dynamic "ser_de_info" {
+      for_each = (var.ser_de.name != null || var.ser_de.serialization_library != null
+        ? [var.ser_de]
+        : []
+      )
+
+      content {
+        name                  = ser_de_info.value.name
+        serialization_library = ser_de_info.value.serialization_library
+        parameters            = ser_de_info.value.parameters
+      }
+    }
+  }
+
+  parameters = var.parameters
 }
