@@ -34,7 +34,7 @@ module "role__iam_identity_center" {
   count = (var.iam_identity_center.enabled && var.iam_identity_center.default_service_role.enabled) ? 1 : 0
 
   source  = "tedilabs/account/aws//modules/iam-role"
-  version = "~> 0.33.11"
+  version = "~> 0.34.0"
 
   name = coalesce(
     var.iam_identity_center.default_service_role.name,
@@ -88,6 +88,10 @@ module "role__iam_identity_center" {
     local.module_tags,
     var.tags,
   )
+
+  telemetry = {
+    enabled = false
+  }
 }
 
 
@@ -95,7 +99,7 @@ module "role__spark" {
   count = (local.engine_type == "APACHE_SPARK" && var.default_spark_execution_role.enabled) ? 1 : 0
 
   source  = "tedilabs/account/aws//modules/iam-role"
-  version = "~> 0.33.0"
+  version = "~> 0.34.0"
 
   name = coalesce(
     var.default_spark_execution_role.name,
@@ -142,6 +146,10 @@ module "role__spark" {
     local.module_tags,
     var.tags,
   )
+
+  telemetry = {
+    enabled = false
+  }
 }
 
 
