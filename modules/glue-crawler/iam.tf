@@ -24,7 +24,7 @@ module "role" {
   count = var.default_service_role.enabled ? 1 : 0
 
   source  = "tedilabs/account/aws//modules/iam-role"
-  version = "~> 0.33.0"
+  version = "~> 0.34.0"
 
   name = coalesce(
     var.default_service_role.name,
@@ -64,6 +64,10 @@ module "role" {
     local.module_tags,
     var.tags,
   )
+
+  telemetry = {
+    enabled = false
+  }
 }
 
 
