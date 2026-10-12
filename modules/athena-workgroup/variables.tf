@@ -195,6 +195,7 @@ variable "default_spark_execution_role" {
     (Optional) `name` - The name of the IAM Role. If not provided, a name will be generated using the module name and instance name.
     (Optional) `path` - The path for the IAM Role. Defaults to `/`.
     (Optional) `description` - The description of the IAM Role. Defaults to `Managed by Terraform.`.
+    (Optional) `assumable_roles` - A set of IAM role ARNs that can be assumed by this role. Defaults to `[]`.
     (Optional) `policies` - A list of IAM Policy ARNs to attach to the IAM Role. Defaults to an empty list.
     (Optional) `inline_policies` - A map of names to inline policy documents to attach to the IAM Role. Defaults to an empty map.
     (Optional) `permissions_boundary` - The ARN of the IAM policy to use as permissions boundary for the default IAM Role.
@@ -204,6 +205,7 @@ variable "default_spark_execution_role" {
     name                 = optional(string)
     path                 = optional(string, "/")
     description          = optional(string, "Managed by Terraform.")
+    assumable_roles      = optional(set(string), [])
     policies             = optional(list(string), [])
     inline_policies      = optional(map(string), {})
     permissions_boundary = optional(string)
@@ -333,6 +335,7 @@ variable "iam_identity_center" {
       (Optional) `name` - The name of the IAM Role. If not provided, a name will be generated using the module name and instance name.
       (Optional) `path` - The path for the IAM Role. Defaults to `/`.
       (Optional) `description` - The description of the IAM Role. Defaults to `Managed by Terraform.`.
+      (Optional) `assumable_roles` - A set of IAM role ARNs that can be assumed by this role. Defaults to `[]`.
       (Optional) `policies` - A list of IAM Policy ARNs to attach to the IAM Role. Defaults to an empty list.
       (Optional) `inline_policies` - A map of names to inline policy documents to attach to the IAM Role. Defaults to an empty map.
       (Optional) `permissions_boundary` - The ARN of the IAM policy to use as permissions boundary for the default IAM Role.
@@ -346,6 +349,7 @@ variable "iam_identity_center" {
       name                 = optional(string)
       path                 = optional(string, "/")
       description          = optional(string, "Managed by Terraform.")
+      assumable_roles      = optional(set(string), [])
       policies             = optional(list(string), [])
       inline_policies      = optional(map(string), {})
       permissions_boundary = optional(string)

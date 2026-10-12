@@ -39,6 +39,8 @@ module "role" {
     },
   ]
 
+  assumable_roles = var.default_service_role.assumable_roles
+
   policies = concat(
     ["arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole"],
     var.default_service_role.policies,

@@ -351,6 +351,7 @@ variable "default_service_role" {
     (Optional) `name` - The name of the default service role. Defaults to `glue-crawler-$${var.name}`.
     (Optional) `path` - The path of the default service role. Defaults to `/`.
     (Optional) `description` - The description of the default service role.
+    (Optional) `assumable_roles` - A set of IAM role ARNs that can be assumed by this role. Defaults to `[]`.
     (Optional) `policies` - A list of IAM policy ARNs to attach to the default service role. `AWSGlueServiceRole` is always attached. Defaults to `[]`.
     (Optional) `inline_policies` - A Map of inline IAM policies to attach to the default service role. (`name` => `policy`).
     (Optional) `permissions_boundary` - The ARN of the IAM policy to use as permissions boundary for the default service role.
@@ -361,6 +362,7 @@ variable "default_service_role" {
     path        = optional(string, "/")
     description = optional(string, "Managed by Terraform.")
 
+    assumable_roles      = optional(set(string), [])
     policies             = optional(list(string), [])
     inline_policies      = optional(map(string), {})
     permissions_boundary = optional(string)

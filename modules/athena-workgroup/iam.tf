@@ -68,6 +68,8 @@ module "role__iam_identity_center" {
     ]
   }
 
+  assumable_roles = var.iam_identity_center.default_service_role.assumable_roles
+
   policies = var.iam_identity_center.default_service_role.policies
   inline_policies = merge(
     {
@@ -125,6 +127,8 @@ module "role__spark" {
       ]
     },
   ]
+
+  assumable_roles = var.default_spark_execution_role.assumable_roles
 
   policies = var.default_spark_execution_role.policies
   inline_policies = merge(
