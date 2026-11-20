@@ -85,7 +85,7 @@ output "data_sources" {
         path = source.path
 
         scanning_rate         = source.scan_rate
-        data_sampling_enabled = source.scan_all
+        data_sampling_enabled = !source.scan_all
       }
     ]
     hudi = [
@@ -120,7 +120,7 @@ output "data_sources" {
         path       = source.path
         connection = source.connection_name
 
-        data_sampling_enabled = source.scan_all
+        data_sampling_enabled = !source.scan_all
       }
     ]
     s3 = [

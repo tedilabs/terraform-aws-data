@@ -85,7 +85,7 @@ resource "aws_glue_crawler" "this" {
       path = source.value.path
 
       scan_rate = source.value.scanning_rate
-      scan_all  = source.value.data_sampling_enabled
+      scan_all  = !source.value.data_sampling_enabled
     }
   }
 
@@ -136,7 +136,7 @@ resource "aws_glue_crawler" "this" {
       path            = source.value.path
       connection_name = source.value.connection
 
-      scan_all = source.value.data_sampling_enabled
+      scan_all = !source.value.data_sampling_enabled
     }
   }
 

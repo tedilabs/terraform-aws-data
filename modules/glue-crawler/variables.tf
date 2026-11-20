@@ -118,13 +118,13 @@ variable "dynamodb_data_sources" {
   (Optional) A list of DynamoDB data sources to be scanned by the crawler. Each item of `dynamodb_data_sources` as defined below.
     (Required) `path` - The name of the DynamoDB table to crawl.
     (Optional) `scanning_rate` - The percentage of the configured DynamoDB table Read Capacity Units to be used by the AWS Glue crawler. The valid values are between `0.1` to `1.5`. If not specified, defaults to `0.5`% for provisioned tables and 1/4 of maximum configured capacity for On-Demand tables.
-    (Optional) `data_sampling_enabled` - Whether to scan all the records, or to sample rows from the table. Scanning all the records can take a long time when the table is not a high throughput table. Defaults to `true`.
+    (Optional) `data_sampling_enabled` - Whether to sample rows from the table instead of scanning all the records. Scanning all the records can take a long time when the table is not a high throughput table. Defaults to `false`.
   EOF
   type = list(object({
     path = string
 
     scanning_rate         = optional(number)
-    data_sampling_enabled = optional(bool, true)
+    data_sampling_enabled = optional(bool, false)
   }))
   default  = []
   nullable = false
@@ -217,13 +217,13 @@ variable "mongodb_data_sources" {
   (Optional) A list of MongoDB data sources to be scanned by the crawler. Each item of `mongodb_data_sources` as defined below.
     (Required) `path` - The path of the Amazon DocumentDB or MongoDB data source (database/collection). Use `database/collection` format.
     (Optional) `connection` - The name of the connection to use to connect to the Amazon DocumentDB or MongoDB data source.
-    (Optional) `data_sampling_enabled` - Whether to scan all the records, or to sample rows from the table. Scanning all the records can take a long time when the table is not a high throughput table. Defaults to `true`.
+    (Optional) `data_sampling_enabled` - Whether to sample rows from the table instead of scanning all the records. Scanning all the records can take a long time when the table is not a high throughput table. Defaults to `false`.
   EOF
   type = list(object({
     path       = string
     connection = optional(string)
 
-    data_sampling_enabled = optional(bool, true)
+    data_sampling_enabled = optional(bool, false)
   }))
   default  = []
   nullable = false
