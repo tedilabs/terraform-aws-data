@@ -115,7 +115,7 @@ variable "resource_group" {
 variable "shares" {
   description = "(Optional) A list of resource shares via RAM (Resource Access Manager)."
   type = list(object({
-    name = optional(string)
+    name = string
 
     # INFO
     # - `AWSRAMDefaultPermissionGlueDatabase`
