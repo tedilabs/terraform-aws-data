@@ -318,10 +318,12 @@ variable "query_result" {
     condition = anytrue([
       var.query_result.management_mode != "CUSTOMER_MANAGED",
       (var.query_result.management_mode == "CUSTOMER_MANAGED"
-        && endswith(var.query_result.customer_managed_query_result.s3_bucket.key_prefix, "/")
+        && (var.query_result.customer_managed_query_result.s3_bucket.key_prefix == ""
+          || endswith(var.query_result.customer_managed_query_result.s3_bucket.key_prefix, "/")
+        )
       )
     ])
-    error_message = "`s3_bucket.key_prefix` must end with `/`."
+    error_message = "`s3_bucket.key_prefix` must be empty or end with `/`."
   }
 }
 
