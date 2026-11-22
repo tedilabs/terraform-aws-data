@@ -9,7 +9,7 @@ output "arn" {
 }
 
 output "id" {
-  description = "The ID of the database."
+  description = "The ID of the table."
   value       = aws_glue_catalog_table.this.id
 }
 

@@ -29,7 +29,7 @@ output "description" {
 }
 
 output "location_uri" {
-  description = "The description of the database."
+  description = "The location URI of the database."
   value       = aws_glue_catalog_database.this.location_uri
 }
 
