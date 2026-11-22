@@ -49,8 +49,10 @@ module "role" {
     {
       "cloudwatch" = data.aws_iam_policy_document.cloudwatch.json
       "glue"       = data.aws_iam_policy_document.glue.json
-      "s3-sources" = data.aws_iam_policy_document.s3_sources.json
     },
+    length(local.s3_source_buckets) > 0 ? {
+      "s3-sources" = data.aws_iam_policy_document.s3_sources.json
+    } : {},
     var.default_service_role.inline_policies
   )
 
