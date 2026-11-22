@@ -48,7 +48,7 @@ output "custom_classifiers" {
 
 output "data_sources" {
   description = <<EOF
-  The configuration for data sources of the the crawler.
+  The configuration for data sources of the crawler.
     `catalog` - A list of Glue Data Catalog data sources to be scanned by the crawler.
     `delta_lake` - A list of Delta Lake data sources to be scanned by the crawler.
     `dynamodb` - A list of DynamoDB data sources to be scanned by the crawler.
@@ -162,7 +162,7 @@ output "schema_change_policy" {
 }
 
 output "service_role" {
-  description = "The Amazon Resource Name (ARN) of the IAM role used by the crawler to access other esources."
+  description = "The Amazon Resource Name (ARN) of the IAM role used by the crawler to access other resources."
   value       = aws_glue_crawler.this.role
 }
 

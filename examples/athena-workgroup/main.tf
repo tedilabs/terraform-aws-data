@@ -30,7 +30,7 @@ module "full" {
   # version = "~> 0.8.0"
 
   name        = "full"
-  description = "This workgroup is created with full configurtaions."
+  description = "This workgroup is created with full configurations."
 
   enabled       = true
   force_destroy = true
