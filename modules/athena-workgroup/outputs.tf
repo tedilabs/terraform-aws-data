@@ -145,7 +145,7 @@ output "calculation_result" {
 }
 
 output "iam_identity_center" {
-  description = "The configuration for query result location and encryption."
+  description = "The configuration for IAM Identity Center authentication."
   value = (local.engine_type == "ATHENA_SQL"
     ? {
       enabled = (one(aws_athena_workgroup.this.configuration[0].identity_center_configuration[*].enable_identity_center) != null

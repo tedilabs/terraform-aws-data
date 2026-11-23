@@ -64,7 +64,7 @@ This module creates following resources.
 | <a name="output_id"></a> [id](#output\_id) | The ID of the database. |
 | <a name="output_location_uri"></a> [location\_uri](#output\_location\_uri) | The location URI of the database. |
 | <a name="output_name"></a> [name](#output\_name) | The name of the database. |
-| <a name="output_parameters"></a> [parameters](#output\_parameters) | A set of key value pairs that specifies the Lambda function or functions to use for creating the data catalog. |
+| <a name="output_parameters"></a> [parameters](#output\_parameters) | The key-value pairs that define parameters and properties of the database. |
 | <a name="output_region"></a> [region](#output\_region) | The AWS region this module resources resides in. |
 | <a name="output_resource_group"></a> [resource\_group](#output\_resource\_group) | The resource group created to manage resources in this module. |
 | <a name="output_sharing"></a> [sharing](#output\_sharing) | The configuration for sharing of the Glue Database.<br/>    `status` - An indication of whether the database is shared with other AWS accounts, or was shared with the current account by another AWS account. Sharing is configured through AWS Resource Access Manager (AWS RAM). Values are `NOT_SHARED`, `SHARED_BY_ME` or `SHARED_WITH_ME`.<br/>    `shares` - The list of resource shares via RAM (Resource Access Manager). |

@@ -223,7 +223,7 @@ variable "spark_execution_role" {
 
 variable "query_result" {
   description = <<EOF
-  (Optional) The configuration for query result location and encryption. Only required if you use Apache Spark engine types. `query_result` block as defined below.
+  (Optional) The configuration for query result location and encryption. Only supported if you use Athena SQL engine types. `query_result` block as defined below.
     (Optional) `management_mode` - The mode of query result management. Valid values are `CUSTOMER_MANAGED` and `ATHENA_MANAGED`. Defaults to `ATHENA_MANAGED`.
       `CUSTOMER_MANAGED` - You manage the storage for your query results and keep the results as long as you require.
       `ATHENA_MANAGED` - Athena manages the storage for your queries and retains query results for 24 hours.
