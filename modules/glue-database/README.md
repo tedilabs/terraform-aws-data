@@ -62,7 +62,7 @@ This module creates following resources.
 | <a name="output_description"></a> [description](#output\_description) | The description of the database. |
 | <a name="output_federated_database"></a> [federated\_database](#output\_federated\_database) | The configuration of federated database to reference an entity outside the AWS Glue Data Catalog. |
 | <a name="output_id"></a> [id](#output\_id) | The ID of the database. |
-| <a name="output_location_uri"></a> [location\_uri](#output\_location\_uri) | The description of the database. |
+| <a name="output_location_uri"></a> [location\_uri](#output\_location\_uri) | The location URI of the database. |
 | <a name="output_name"></a> [name](#output\_name) | The name of the database. |
 | <a name="output_parameters"></a> [parameters](#output\_parameters) | A set of key value pairs that specifies the Lambda function or functions to use for creating the data catalog. |
 | <a name="output_region"></a> [region](#output\_region) | The AWS region this module resources resides in. |

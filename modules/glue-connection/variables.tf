@@ -50,7 +50,7 @@ variable "properties" {
     (Required) `KAFKA_BOOTSTRAP_SERVERS`.
     (Optional) `KAFKA_SSL_ENABLED`, `KAFKA_CUSTOM_CERT`, `KAFKA_SKIP_CUSTOM_CERT_VALIDATION`.
     (Optional) `KAFKA_CLIENT_KEYSTORE`, `KAFKA_CLIENT_KEYSTORE_PASSWORD`, `KAFKA_CLIENT_KEY_PASSWORD`, `ENCRYPTED_KAFKA_CLIENT_KEYSTORE_PASSWORD`, `ENCRYPTED_KAFKA_CLIENT_KEY_PASSWORD`
-    (Optional) `KAFKA_SASL_MECHANISM` - Valid values are `SCRAM-SHA-512`, `GSSAPI`, or `AWS_MSK_IAM`.
+    (Optional) `KAFKA_SASL_MECHANISM` - Valid values are `SCRAM-SHA-512`, `GSSAPI`, `AWS_MSK_IAM`, or `PLAIN`.
     (Optional) `KAFKA_SASL_SCRAM_USERNAME`, `KAFKA_SASL_SCRAM_PASSWORD`, `ENCRYPTED_KAFKA_SASL_SCRAM_PASSWORD` - Parameters are used to configure SASL/SCRAM-SHA-512 authentication.
     (Optional) `KAFKA_SASL_GSSAPI_KEYTAB`, `KAFKA_SASL_GSSAPI_KRB5_CONF`, `KAFKA_SASL_GSSAPI_SERVICE`, `KAFKA_SASL_GSSAPI_PRINCIPAL` - Parameters are used to configure SASL/GSSAPI authentication.
 
@@ -120,8 +120,8 @@ variable "vpc_association" {
         (Optional) `ipv4_cidrs` - The IPv4 network ranges to allow, in CIDR notation.
         (Optional) `ipv6_cidrs` - The IPv6 network ranges to allow, in CIDR notation.
         (Optional) `prefix_lists` - The prefix list IDs to allow.
-        (Optional) `security_groups` - The source security group IDs to allow.
-        (Optional) `self` - Whether the security group itself will be added as a source to this ingress rule.
+        (Optional) `security_groups` - The destination security group IDs to allow.
+        (Optional) `self` - Whether the security group itself will be added as a destination to this egress rule.
     (Optional) `security_groups` - A set of IDs of security groups to allow access to the data store in your VPC subnet. Security groups are associated to the ENI attached to your subnet. You must choose at least one security group with a self-referencing inbound rule for all TCP ports.
   EOF
   type = object({

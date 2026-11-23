@@ -60,7 +60,7 @@ This module creates following resources.
 | <a name="output_catalog"></a> [catalog](#output\_catalog) | The ID of the Glue Catalog of the table. |
 | <a name="output_database"></a> [database](#output\_database) | The catalog database in which to create the new table. |
 | <a name="output_description"></a> [description](#output\_description) | The description of the table. |
-| <a name="output_id"></a> [id](#output\_id) | The ID of the database. |
+| <a name="output_id"></a> [id](#output\_id) | The ID of the table. |
 | <a name="output_name"></a> [name](#output\_name) | The name of the table. |
 | <a name="output_owner"></a> [owner](#output\_owner) | The table owner. |
 | <a name="output_region"></a> [region](#output\_region) | The AWS region this module resources resides in. |
