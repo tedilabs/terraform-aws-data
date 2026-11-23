@@ -79,7 +79,7 @@ variable "parameters" {
         if var.type == "LAMBDA"
       ]),
     ])
-    error_message = "For type `LAMBDA`, either both `metadata-function` and `record-function` parameters or `function` parameter must be provided."
+    error_message = "For type `LAMBDA`, only `metadata-function` and `record-function` parameters, or only `function` parameter are allowed."
   }
   validation {
     condition = alltrue([
@@ -110,7 +110,7 @@ variable "parameters" {
         if var.type == "FEDERATED"
       ]),
     ])
-    error_message = "For type `FEDERATED`, either `connection-arn` parameter or both `connection-type` and `connection-properties` parameters must be provided."
+    error_message = "For type `FEDERATED`, only `connection-arn` parameter, or only `connection-type` and `connection-properties` parameters are allowed."
   }
 }
 
