@@ -59,8 +59,8 @@ resource "aws_glue_crawler" "this" {
       tables          = source.value.tables
       connection_name = source.value.connection
 
-      event_queue_arn     = var.recrawl_behavior == "CRAWL_EVENT_MODE" ? source.value.event_mode.sqs_queue : null
-      dlq_event_queue_arn = var.recrawl_behavior == "CRAWL_EVENT_MODE" ? source.value.event_mode.sqs_dead_letter_queue : null
+      event_queue_arn     = var.recrawl_behavior == "CRAWL_EVENT_MODE" ? try(source.value.event_mode.sqs_queue, null) : null
+      dlq_event_queue_arn = var.recrawl_behavior == "CRAWL_EVENT_MODE" ? try(source.value.event_mode.sqs_dead_letter_queue, null) : null
     }
   }
 
@@ -151,8 +151,8 @@ resource "aws_glue_crawler" "this" {
       exclusions  = source.value.exclusion_patterns
       sample_size = source.value.sample_size
 
-      event_queue_arn     = var.recrawl_behavior == "CRAWL_EVENT_MODE" ? source.value.event_mode.sqs_queue : null
-      dlq_event_queue_arn = var.recrawl_behavior == "CRAWL_EVENT_MODE" ? source.value.event_mode.sqs_dead_letter_queue : null
+      event_queue_arn     = var.recrawl_behavior == "CRAWL_EVENT_MODE" ? try(source.value.event_mode.sqs_queue, null) : null
+      dlq_event_queue_arn = var.recrawl_behavior == "CRAWL_EVENT_MODE" ? try(source.value.event_mode.sqs_dead_letter_queue, null) : null
     }
   }
 

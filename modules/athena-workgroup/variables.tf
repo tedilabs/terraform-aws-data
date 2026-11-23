@@ -299,7 +299,15 @@ variable "query_result" {
   validation {
     condition = anytrue([
       var.query_result.management_mode != "CUSTOMER_MANAGED",
-      (var.query_result.management_mode == "CUSTOMER_MANAGED"
+      var.query_result.customer_managed_query_result != null,
+    ])
+    error_message = "`query_result.customer_managed_query_result` is required if `query_result.management_mode` is `CUSTOMER_MANAGED`."
+  }
+  validation {
+    condition = anytrue([
+      var.query_result.management_mode != "CUSTOMER_MANAGED",
+      var.query_result.customer_managed_query_result == null,
+      (var.query_result.management_mode == "CUSTOMER_MANAGED" && var.query_result.customer_managed_query_result != null
         && contains(["SSE_S3", "SSE_KMS", "CSE_KMS"], var.query_result.customer_managed_query_result.encryption.mode)
       )
     ])
@@ -308,7 +316,8 @@ variable "query_result" {
   validation {
     condition = anytrue([
       var.query_result.management_mode != "CUSTOMER_MANAGED",
-      (var.query_result.management_mode == "CUSTOMER_MANAGED"
+      var.query_result.customer_managed_query_result == null,
+      (var.query_result.management_mode == "CUSTOMER_MANAGED" && var.query_result.customer_managed_query_result != null
         && !startswith(var.query_result.customer_managed_query_result.s3_bucket.key_prefix, "/")
       )
     ])
@@ -317,7 +326,8 @@ variable "query_result" {
   validation {
     condition = anytrue([
       var.query_result.management_mode != "CUSTOMER_MANAGED",
-      (var.query_result.management_mode == "CUSTOMER_MANAGED"
+      var.query_result.customer_managed_query_result == null,
+      (var.query_result.management_mode == "CUSTOMER_MANAGED" && var.query_result.customer_managed_query_result != null
         && (var.query_result.customer_managed_query_result.s3_bucket.key_prefix == ""
           || endswith(var.query_result.customer_managed_query_result.s3_bucket.key_prefix, "/")
         )
