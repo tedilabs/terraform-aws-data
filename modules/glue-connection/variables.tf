@@ -166,6 +166,14 @@ variable "vpc_association" {
   })
   default  = {}
   nullable = false
+
+  validation {
+    condition = anytrue([
+      !var.vpc_association.enabled,
+      var.vpc_association.subnet != null,
+    ])
+    error_message = "`vpc_association.subnet` is required if `vpc_association.enabled` is `true`."
+  }
 }
 
 variable "tags" {
