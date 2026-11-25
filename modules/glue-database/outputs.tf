@@ -34,7 +34,7 @@ output "location_uri" {
 }
 
 output "parameters" {
-  description = "A set of key value pairs that specifies the Lambda function or functions to use for creating the data catalog."
+  description = "The key-value pairs that define parameters and properties of the database."
   value       = aws_glue_catalog_database.this.parameters
 }
 
